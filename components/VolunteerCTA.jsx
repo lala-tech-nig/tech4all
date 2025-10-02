@@ -9,13 +9,13 @@ import stars from '../public/lotties/stars.json';
 
 export default function VolunteerCTA({ onOpenVolunteer }) {
   return (
-    <section id="volunteer" className="relative bg-gradient-to-r from-orange-50 via-white to-orange-100 py-20 overflow-hidden">
+    <section id="volunteer" className="relative py-20 overflow-hidden">
       {/* Background Confetti Animation */}
       <div className="absolute inset-0 pointer-events-none opacity-40">
         <Lottie animationData={confetti} loop={true} autoplay={true} />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-10">
+      <div className="relative max-w-7xl mx-auto px-10 flex flex-col md:flex-row items-center justify-between gap-10">
         {/* Text Content */}
         <motion.div
           initial={{ opacity: 0, x: -80 }}
