@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 
 const ENTRIES = [
   // Volunteers
@@ -147,40 +146,53 @@ const ENTRIES = [
 
 export default function HallOfFamePage() {
   const [selected, setSelected] = useState(null);
-  const [activeCategory, setActiveCategory] = useState("volunteer");
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("all");
 
-  const categories = ["volunteer", "community", "organization", "donor"];
+  const categories = ["all", "volunteer", "community", "organization", "donor"];
 
-  const filteredEntries = ENTRIES.filter(
-    (entry) => entry.category === activeCategory
-  );
+  const filteredEntries = ENTRIES.filter((entry) => {
+    const matchesCategory =
+      activeCategory === "all" || entry.category === activeCategory;
+    const matchesSearch =
+      entry.name.toLowerCase().includes(search.toLowerCase()) ||
+      entry.title.toLowerCase().includes(search.toLowerCase()) ||
+      entry.bio.toLowerCase().includes(search.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <section className="max-w-7xl mx-auto px-6 py-16">
-      {/* Header + Filter row */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-10">
-        <h2 className="text-3xl font-bold text-black">
-          Hall of Fame
-        </h2>
-        <div className="flex items-center gap-6 mt-4 md:mt-0">
-          <p className="hidden md:block text-gray-600 italic font-medium">
-            Celebrating the heroes making tech accessible for everyone 🚀
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                  activeCategory === cat
-                    ? "bg-orange-500 text-white"
-                    : "bg-black text-white hover:bg-orange-500"
-                }`}
-              >
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}s
-              </button>
-            ))}
-          </div>
+      <h2 className="text-3xl font-bold mb-8 text-center text-black">
+        Hall of Fame
+      </h2>
+
+      {/* Search + Filter */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+        <input
+          type="text"
+          placeholder="Search by name, title, or bio..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full md:w-1/2 px-4 py-2 border border-black rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+        />
+
+        <div className="flex flex-wrap gap-2">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                activeCategory === cat
+                  ? "bg-orange-500 text-white"
+                  : "bg-black text-white hover:bg-orange-500"
+              }`}
+            >
+              {cat === "all"
+                ? "All"
+                : cat.charAt(0).toUpperCase() + cat.slice(1) + "s"}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -269,15 +281,6 @@ export default function HallOfFamePage() {
           </div>
         </div>
       )}
-
-            <div className="flex justify-center mt-10">
-        <Link 
-          href="/hall-of-fame" 
-          className="px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-orange-600 transition"
-        >
-          View Full Hall Of Fame →
-        </Link>
-      </div>
     </section>
   );
 }
