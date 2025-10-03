@@ -1,45 +1,88 @@
 'use client';
 import { useState } from 'react';
 
-export default function ContactForm(){
-  const [form, setForm] = useState({ org: '', name: '', email: '', phone: '', message: ''});
+export default function ContactForm() {
+  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [sent, setSent] = useState(false);
 
-  function handleChange(e){
-    setForm({...form, [e.target.name]: e.target.value});
+  function handleChange(e) {
+    setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function handleSubmit(e){
+  function handleSubmit(e) {
     e.preventDefault();
-    // TODO: POST to backend endpoint /api/requests or contact route
     console.log('Contact form', form);
     setSent(true);
     setTimeout(() => setSent(false), 4000);
-    setForm({ org: '', name: '', email: '', phone: '', message: ''});
+    setForm({ name: '', email: '', phone: '', message: '' });
   }
 
   return (
-    <section id="contact" className="py-16 bg-gray-50">
-      <div className="max-w-3xl mx-auto px-6">
-        <h3 className="text-2xl font-bold text-center">Contact / Request Training</h3>
-        <p className="text-center text-sm text-gray-600 mt-2">Fill this form to request a program, volunteer, or partner with us.</p>
+    <section id="contact" className="py-20 bg-gray-50">
+      <div className="max-w-2xl mx-auto px-6">
+        {/* Header */}
+        <h3 className="text-4xl font-extrabold text-center text-gray-800">Contact Us</h3>
+        <p className="text-center text-lg text-gray-600 mt-3 max-w-lg mx-auto">
+          We’d love to hear from you. Whether you have a question, feedback, or a project in mind — 
+          let’s start the conversation today. 🚀
+        </p>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4 bg-white p-6 rounded-xl shadow">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input name="org" value={form.org} onChange={handleChange} placeholder="Organization / Community" className="w-full border rounded px-4 py-2" />
-            <input name="name" value={form.name} onChange={handleChange} placeholder="Contact name" className="w-full border rounded px-4 py-2" />
+        {/* Form */}
+        <form
+          onSubmit={handleSubmit}
+          className="mt-10 space-y-6 bg-white p-8 rounded-2xl shadow-xl border border-gray-100"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="Your Name"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 focus:ring-2 focus:ring-orange-500 outline-none"
+              required
+            />
+            <input
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Email Address"
+              type="email"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 focus:ring-2 focus:ring-orange-500 outline-none"
+              required
+            />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input name="email" value={form.email} onChange={handleChange} placeholder="Email" type="email" className="w-full border rounded px-4 py-2" />
-            <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" className="w-full border rounded px-4 py-2" />
-          </div>
+          <input
+            name="phone"
+            value={form.phone}
+            onChange={handleChange}
+            placeholder="Phone Number"
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 focus:ring-2 focus:ring-orange-500 outline-none"
+          />
 
-          <textarea name="message" value={form.message} onChange={handleChange} placeholder="Message / Details" rows="4" className="w-full border rounded px-4 py-2" />
+          <textarea
+            name="message"
+            value={form.message}
+            onChange={handleChange}
+            placeholder="Your Message"
+            rows="5"
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 focus:ring-2 focus:ring-orange-500 outline-none"
+            required
+          />
 
-          <div className="flex items-center justify-between">
-            <button type="submit" className="bg-orange-500 text-white px-6 py-2 rounded-md">Send request</button>
-            <div className="text-sm text-gray-500">{sent ? 'Request sent — we will contact you soon.' : 'We reply within 48 hours.'}</div>
+          {/* Footer */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <button
+              type="submit"
+              className="bg-orange-500 hover:bg-orange-600 transition text-white px-8 py-3 rounded-lg font-semibold shadow-md"
+            >
+              Send Message
+            </button>
+            <div className="text-sm text-gray-500 text-center sm:text-left">
+              {sent
+                ? '✅ Message sent! We’ll get back to you shortly.'
+                : '⏳ Our team replies within 24–48 hours.'}
+            </div>
           </div>
         </form>
       </div>
