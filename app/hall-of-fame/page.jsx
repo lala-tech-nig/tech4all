@@ -101,7 +101,7 @@ const ENTRIES = [
     category: "organization",
     name: "FutureNet Africa",
     title: "Partner",
-    photo: "/partners/partner3.png",
+    photo: "/partners/future.png",
     badge: "Partner",
     joined: "2021",
     rating: 5,
