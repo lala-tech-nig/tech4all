@@ -1,157 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
-const ENTRIES = [
-  // Volunteers
-  {
-    id: 1,
-    category: "volunteer",
-    name: "Aisha Bello",
-    title: "Lead Trainer",
-    photo: "/events/aisha.jpg",
-    badge: "Verified",
-    joined: "Jan 2022",
-    rating: 5,
-    bio: "Aisha has trained over 300 youths in coding, web development, and entrepreneurship.",
-  },
-  {
-    id: 2,
-    category: "volunteer",
-    name: "Michael Johnson",
-    title: "Tech Mentor",
-    photo: "/events/johnson.jpg",
-    badge: "Mentor",
-    joined: "Aug 2021",
-    rating: 4,
-    bio: "Michael volunteers weekly, guiding students in building real-world mobile apps.",
-  },
-  {
-    id: 3,
-    category: "volunteer",
-    name: "Fatima Yusuf",
-    title: "Digital Marketing Coach",
-    photo: "/events/fatima.jpg",
-    badge: "Coach",
-    joined: "May 2023",
-    rating: 5,
-    bio: "Fatima empowers small businesses by training them on online growth strategies.",
-  },
-
-  // Communities
-  {
-    id: 4,
-    category: "community",
-    name: "Olambe Akute",
-    title: "Community Beneficiary",
-    photo: "/events/olambe.jpg",
-    badge: "500 trained",
-    joined: "2024",
-    rating: 5,
-    bio: "Olambe Akute community has benefited from free ICT training with over 500 trained participants.",
-  },
-  {
-    id: 5,
-    category: "community",
-    name: "Agege Youth Center",
-    title: "Beneficiary",
-    photo: "/events/agege.jpg",
-    badge: "200 youths",
-    joined: "2023",
-    rating: 4,
-    bio: "The Agege Youth Center partnered with Tech4All to train 200 youths in computer literacy.",
-  },
-  {
-    id: 6,
-    category: "community",
-    name: "Oshodi Market Women",
-    title: "Beneficiary",
-    photo: "/events/oshodi.jpg",
-    badge: "150 trained",
-    joined: "2022",
-    rating: 4,
-    bio: "Oshodi women entrepreneurs learned digital payments and online selling skills.",
-  },
-
-  // Organizations
-  {
-    id: 7,
-    category: "organization",
-    name: "DevHub Foundation",
-    title: "Partner",
-    photo: "/partners/dev.png",
-    badge: "Partner",
-    joined: "2019",
-    rating: 5,
-    bio: "DevHub Foundation partners with Tech4All to empower African tech talents.",
-  },
-  {
-    id: 8,
-    category: "organization",
-    name: "Code4Naija",
-    title: "Partner",
-    photo: "/partners/code.png",
-    badge: "Partner",
-    joined: "2020",
-    rating: 4,
-    bio: "Code4Naija provides coding bootcamps and collaborates on hackathons.",
-  },
-  {
-    id: 9,
-    category: "organization",
-    name: "FutureNet Africa",
-    title: "Partner",
-    photo: "/partners/future.png",
-    badge: "Partner",
-    joined: "2021",
-    rating: 5,
-    bio: "FutureNet Africa has sponsored several ICT hubs across Nigeria.",
-  },
-
-  // Donors
-  {
-    id: 10,
-    category: "donor",
-    name: "Hon. Motunrayo Adijat Adeleye",
-    title: "Gold Donor",
-    photo: "/partners/adjdonor.jpg",
-    badge: "Gold",
-    joined: "2020",
-    rating: 5,
-    bio: "Mr Chukwu has been a strong financial supporter of Tech4All initiatives since 2020.",
-  },
-  {
-    id: 11,
-    category: "donor",
-    name: "LALA TECH",
-    title: "Silver Donor",
-    photo: "/partners/partner4.png",
-    badge: "Silver",
-    joined: "2021",
-    rating: 4,
-    bio: "Mrs Ade contributes annually to sponsor female students into tech programs.",
-  },
-  {
-    id: 12,
-    category: "donor",
-    name: "Microsoft Software",
-    title: "Corporate Donor",
-    photo: "/partners/partner2.png",
-    badge: "Corporate",
-    joined: "2022",
-    rating: 5,
-    bio: "TechStars Africa sponsors infrastructure, devices, and scholarship programs.",
-  },
-];
-
 export default function HallOfFamePage() {
+  const [entries, setEntries] = useState([]);
   const [selected, setSelected] = useState(null);
   const [activeCategory, setActiveCategory] = useState("volunteer");
+  const [loading, setLoading] = useState(true);
 
   const categories = ["volunteer", "community", "organization", "donor"];
 
-  const filteredEntries = ENTRIES.filter(
+  useEffect(() => {
+    fetch('http://localhost:5000/api/hall-of-fame')
+      .then(res => res.json())
+      .then(data => setEntries(data))
+      .catch(() => setEntries([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filteredEntries = entries.filter(
     (entry) => entry.category === activeCategory
   );
 
@@ -159,9 +27,7 @@ export default function HallOfFamePage() {
     <section className="max-w-7xl mx-auto px-6 py-16">
       {/* Header + Filter row */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-10">
-        <h2 className="text-3xl font-bold text-black">
-          Hall of Fame
-        </h2>
+        <h2 className="text-3xl font-bold text-black">Hall of Fame</h2>
         <div className="flex items-center gap-6 mt-4 md:mt-0">
           <p className="hidden md:block text-gray-600 italic font-medium">
             Celebrating the heroes making tech accessible for everyone 🚀
@@ -185,11 +51,13 @@ export default function HallOfFamePage() {
       </div>
 
       {/* Results */}
-      {filteredEntries.length > 0 ? (
+      {loading ? (
+        <p className="text-center text-gray-400 py-20">Loading...</p>
+      ) : filteredEntries.length > 0 ? (
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
           {filteredEntries.map((f) => (
             <div
-              key={f.id}
+              key={f._id}
               className="bg-white rounded-xl p-4 border border-gray-200 shadow hover:shadow-lg transition transform hover:-translate-y-1 cursor-pointer"
               onClick={() => setSelected(f)}
             >
@@ -197,6 +65,7 @@ export default function HallOfFamePage() {
                 src={f.photo}
                 alt={f.name}
                 className="w-full h-40 object-cover rounded-lg"
+                onError={(e) => { e.target.src = 'https://placehold.co/400x300/f3f4f6/9ca3af?text=Photo'; }}
               />
               <div className="mt-4">
                 <div className="font-semibold text-black">{f.name}</div>
@@ -205,20 +74,11 @@ export default function HallOfFamePage() {
                   <span className="text-xs bg-orange-500 text-white px-2 py-0.5 rounded">
                     {f.badge}
                   </span>
-                  <span className="text-xs text-gray-500">
-                    Joined {f.joined}
-                  </span>
+                  <span className="text-xs text-gray-500">Joined {f.joined}</span>
                 </div>
                 <div className="mt-2 flex">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <span
-                      key={i}
-                      className={`${
-                        i < f.rating ? "text-orange-500" : "text-gray-300"
-                      }`}
-                    >
-                      ★
-                    </span>
+                    <span key={i} className={i < f.rating ? "text-orange-500" : "text-gray-300"}>★</span>
                   ))}
                 </div>
               </div>
@@ -226,43 +86,31 @@ export default function HallOfFamePage() {
           ))}
         </div>
       ) : (
-        <p className="text-center text-gray-500">No results found.</p>
+        <p className="text-center text-gray-500 py-20">No entries in this category yet.</p>
       )}
 
-      {/* Modal */}
+      {/* Detail Modal */}
       {selected && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-white max-w-lg w-full rounded-xl p-6 relative shadow-lg">
             <button
               onClick={() => setSelected(null)}
-              className="absolute top-3 right-3 text-gray-600 hover:text-orange-500"
-            >
-              ✖
-            </button>
+              className="absolute top-3 right-3 text-gray-600 hover:text-orange-500 text-xl"
+            >✖</button>
             <img
               src={selected.photo}
               alt={selected.name}
               className="w-full h-56 object-cover rounded-lg"
+              onError={(e) => { e.target.src = 'https://placehold.co/600x400/f3f4f6/9ca3af?text=Photo'; }}
             />
-            <h3 className="mt-4 text-xl font-bold text-black">
-              {selected.name}
-            </h3>
+            <h3 className="mt-4 text-xl font-bold text-black">{selected.name}</h3>
             <p className="text-sm text-gray-600">{selected.title}</p>
             <p className="mt-2 text-gray-700">{selected.bio}</p>
             <div className="mt-4 flex justify-between items-center">
-              <span className="text-sm text-gray-500">
-                Joined {selected.joined}
-              </span>
+              <span className="text-sm text-gray-500">Joined {selected.joined}</span>
               <div>
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <span
-                    key={i}
-                    className={`${
-                      i < selected.rating ? "text-orange-500" : "text-gray-300"
-                    }`}
-                  >
-                    ★
-                  </span>
+                  <span key={i} className={i < selected.rating ? "text-orange-500" : "text-gray-300"}>★</span>
                 ))}
               </div>
             </div>
@@ -270,9 +118,9 @@ export default function HallOfFamePage() {
         </div>
       )}
 
-            <div className="flex justify-center mt-10">
-        <Link 
-          href="/hall-of-fame" 
+      <div className="flex justify-center mt-10">
+        <Link
+          href="/hall-of-fame"
           className="px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-orange-600 transition"
         >
           View Full Hall Of Fame →

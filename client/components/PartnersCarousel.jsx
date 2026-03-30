@@ -1,11 +1,26 @@
+'use client';
+import { useEffect, useState } from 'react';
+
 export default function PartnersCarousel() {
-  const PARTNERS = [
-    '/partners/partner1.png',
-    '/partners/partner2.png',
-    '/partners/partner3.png',
-    '/partners/partner4.png',
-    '/partners/partner5.png',
-  ];
+  const [partners, setPartners] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/partners')
+      .then(res => res.json())
+      .then(data => setPartners(data))
+      .catch(() => {
+        // fallback to local assets if API unreachable
+        setPartners([
+          { _id: '1', logoUrl: '/partners/partner1.png', name: 'Partner 1' },
+          { _id: '2', logoUrl: '/partners/partner2.png', name: 'Partner 2' },
+          { _id: '3', logoUrl: '/partners/partner3.png', name: 'Partner 3' },
+          { _id: '4', logoUrl: '/partners/partner4.png', name: 'Partner 4' },
+          { _id: '5', logoUrl: '/partners/partner5.png', name: 'Partner 5' },
+        ]);
+      });
+  }, []);
+
+  if (partners.length === 0) return null;
 
   return (
     <section id="partners" className="py-16 bg-gradient-to-b from-gray-50 to-white">
@@ -21,15 +36,16 @@ export default function PartnersCarousel() {
       {/* Lane 1 */}
       <div className="mt-10 overflow-hidden">
         <div className="flex gap-8 animate-marquee">
-          {PARTNERS.concat(PARTNERS).map((p, i) => (
+          {partners.concat(partners).map((p, i) => (
             <div
-              key={i}
+              key={`a-${i}`}
               className="flex-shrink-0 w-40 h-20 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100"
             >
               <img
-                src={p}
-                alt={`partner-${i}`}
+                src={p.logoUrl}
+                alt={p.name}
                 className="max-h-12 object-contain"
+                onError={(e) => { e.target.src = 'https://placehold.co/160x60/f3f4f6/9ca3af?text=Logo'; }}
               />
             </div>
           ))}
@@ -39,15 +55,16 @@ export default function PartnersCarousel() {
       {/* Lane 2 (reverse direction) */}
       <div className="mt-6 overflow-hidden">
         <div className="flex gap-8 animate-marquee-reverse">
-          {PARTNERS.concat(PARTNERS).map((p, i) => (
+          {partners.concat(partners).map((p, i) => (
             <div
-              key={i}
+              key={`b-${i}`}
               className="flex-shrink-0 w-40 h-20 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100"
             >
               <img
-                src={p}
-                alt={`partner-${i}`}
+                src={p.logoUrl}
+                alt={p.name}
                 className="max-h-12 object-contain"
+                onError={(e) => { e.target.src = 'https://placehold.co/160x60/f3f4f6/9ca3af?text=Logo'; }}
               />
             </div>
           ))}

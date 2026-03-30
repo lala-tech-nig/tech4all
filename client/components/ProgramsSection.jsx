@@ -1,51 +1,21 @@
 'use client'; 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Modal from './Modal';
 import RequestModal from './RequestModal';
 
-const PROGRAMS = [
-  { 
-    id: 'repair', 
-    title: 'Phone & Laptop Repair', 
-    desc: 'Learn hands-on diagnostics and repair skills, covering hardware replacement, software fixes, and troubleshooting techniques. This course prepares you to start a career or run your own repair shop.', 
-    video: '/programs/repair.mp4' 
-  },
-  { 
-    id: 'web', 
-    title: 'Website Development', 
-    desc: 'Master HTML, CSS, JavaScript, and responsive design to build and launch professional websites. Ideal for beginners and aspiring developers looking to start freelancing or working in tech.', 
-    video: '/programs/web.mp4' 
-  },
-  { 
-    id: 'intro', 
-    title: 'Intro to Computer', 
-    desc: 'Understand operating systems, file management, email usage, and office productivity tools. Perfect for beginners, students, and anyone new to computers.', 
-    video: '/programs/intro.mp4' 
-  },
-  { 
-    id: 'dm', 
-    title: 'Digital Marketing', 
-    desc: 'Learn social media strategy, paid ads, branding, SEO, and digital tools to help small businesses grow online. Designed for entrepreneurs and business owners.', 
-    video: '/programs/dm.mp4' 
-  },
-  { 
-    id: 'content', 
-    title: 'Content Creation', 
-    desc: 'Develop creative skills in photography, videography, audio editing, and graphics to tell compelling digital stories across platforms like YouTube, Instagram, and TikTok.', 
-    video: '/programs/content.mp4' 
-  },
-  { 
-    id: 'market', 
-    title: 'Market Women Tech Skills', 
-    desc: 'Empowering market women with essential digital tools for payments, inventory, and online selling, helping them expand their businesses and access more customers.', 
-    video: '/programs/market.mp4' 
-  },
-];
 
 export default function ProgramsSection() {
+  const [programs, setPrograms] = useState([]);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [requestProgram, setRequestProgram] = useState(null);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/courses')
+      .then(res => res.json())
+      .then(data => setPrograms(data))
+      .catch(err => console.error('Error fetching programs:', err));
+  }, []);
 
   return (
     <section id="programs" className="max-w-7xl mx-auto px-6 py-20">
@@ -58,9 +28,9 @@ export default function ProgramsSection() {
 
       {/* Program Cards */}
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {PROGRAMS.map((p, i) => (
+        {programs.map((p, i) => (
           <motion.article
-            key={p.id}
+            key={p._id || p.id}
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: i * 0.15 }}
@@ -69,7 +39,7 @@ export default function ProgramsSection() {
           >
             <div className="relative h-48 w-full">
               <video 
-                src={p.video} 
+                src={p.videoUrl || p.video} 
                 autoPlay 
                 loop 
                 muted 
@@ -80,7 +50,7 @@ export default function ProgramsSection() {
               <h4 className="absolute bottom-3 left-4 text-xl font-bold text-white">{p.title}</h4>
             </div>
             <div className="p-6 flex flex-col justify-between h-44">
-              <p className="text-gray-600 text-sm line-clamp-3">{p.desc}</p>
+              <p className="text-gray-600 text-sm line-clamp-3">{p.description || p.desc}</p>
               <div className="mt-4 flex justify-between items-center">
                 <button 
                   onClick={() => setSelectedProgram(p)} 
@@ -105,7 +75,7 @@ export default function ProgramsSection() {
         <Modal onClose={() => setSelectedProgram(null)}>
           <div className="p-6 text-center">
             <video 
-              src={selectedProgram.video} 
+              src={selectedProgram.videoUrl || selectedProgram.video} 
               autoPlay 
               loop 
               muted 
@@ -113,7 +83,7 @@ export default function ProgramsSection() {
               className="rounded-xl mb-4 max-h-60 mx-auto object-cover" 
             />
             <h4 className="text-2xl font-bold mb-3">{selectedProgram.title}</h4>
-            <p className="text-gray-700 mb-6">{selectedProgram.desc}</p>
+            <p className="text-gray-700 mb-6">{selectedProgram.description || selectedProgram.desc}</p>
             <button 
               onClick={() => {
                 setRequestProgram(selectedProgram);

@@ -6,32 +6,63 @@ import ReusableModal from "./ReusableModal";
 import Confetti from "react-confetti";
 import toast from "react-hot-toast";
 
-const SLIDES = [
-  { src: "/hero1.jpg", title: "Tech4All by LALA TECH", subtitle: "Join the global mission to eradicate computer illiteracy." },
-  { src: "/hero2.jpg", title: "Empower Your Community", subtitle: "Request free programs tailored to your people." },
-  { src: "/hero3.jpg", title: "Learn Skills That Pay", subtitle: "From phone & laptop repairs to digital marketing." },
-  { src: "/hero4.jpg", title: "Market Women Go Digital", subtitle: "Equip women with digital payment & selling skills." },
-  { src: "/hero5.jpg", title: "Be Part of History", subtitle: "Volunteer, Donate, and Change the World." }
-];
-
 export default function HeroCarousel() {
+  const [slides, setSlides] = useState([]);
   const [index, setIndex] = useState(0);
   const [modal, setModal] = useState(null);
   const [confetti, setConfetti] = useState(false);
 
   useEffect(() => {
-    const t = setInterval(() => setIndex((i) => (i + 1) % SLIDES.length), 10000); // ⏳ slower slide change
-    return () => clearInterval(t);
+    fetch('http://localhost:5000/api/hero-slides')
+      .then(res => res.json())
+      .then(data => setSlides(data))
+      .catch(() => {
+        // fallback to hardcoded if API unavailable
+        setSlides([
+          { src: "/hero1.jpg", title: "Tech4All by LALA TECH", subtitle: "Join the global mission to eradicate computer illiteracy." },
+          { src: "/hero2.jpg", title: "Empower Your Community", subtitle: "Request free programs tailored to your people." },
+          { src: "/hero3.jpg", title: "Learn Skills That Pay", subtitle: "From phone & laptop repairs to digital marketing." },
+        ]);
+      });
   }, []);
 
-  const handleSubmit = (type, name) => {
+  useEffect(() => {
+    if (slides.length === 0) return;
+    const t = setInterval(() => setIndex((i) => (i + 1) % slides.length), 10000);
+    return () => clearInterval(t);
+  }, [slides.length]);
+
+  const handleSubmit = async (type, formEl) => {
+    const name = formEl.name.value;
+    const email = formEl.email?.value || '';
+    const skills = formEl.skills?.value || '';
+    const persona = formEl.persona?.value || '';
+    const details = formEl.details?.value || '';
+
+    try {
+      if (type === 'volunteer') {
+        await fetch('http://localhost:5000/api/volunteers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, skills }),
+        });
+      } else if (type === 'training') {
+        await fetch('http://localhost:5000/api/requests', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email: email || `${name.replace(/\s+/g,'').toLowerCase()}@request.com`, programName: persona || 'General Training', message: details }),
+        });
+      }
+    } catch { /* silent fail — toast confirms anyway */ }
+
     toast.success(
-      `${type === "training" ? "Training request" : "Volunteer"} by ${name} received. Our team will reach out soon.`,
-      { duration: 10000 } // ⏳ toast visible for 10s
+      `${type === "training" ? "Training request" : "Volunteer application"} by ${name} received! We'll reach out soon.`,
+      { duration: 10000 }
     );
     setModal(null);
     setConfetti(true);
-    setTimeout(() => setConfetti(false), 10000); // 🎉 confetti lasts 10s
+    setTimeout(() => setConfetti(false), 10000);
+    formEl.reset();
   };
 
   const handleDonate = (amount) => {
@@ -46,7 +77,7 @@ export default function HeroCarousel() {
     <section className="relative h-[90vh] w-full overflow-hidden">
       {confetti && <Confetti />}
 
-      {SLIDES.map((s, i) => (
+      {slides.map((s, i) => (
         <div
           key={i}
           className={`absolute inset-0 transition-opacity duration-1000 ${
@@ -114,7 +145,7 @@ export default function HeroCarousel() {
 
       {/* Orange Carousel Indicators */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3">
-        {SLIDES.map((_, i) => (
+        {slides.map((_, i) => (
           <button
             key={i}
             onClick={() => setIndex(i)}

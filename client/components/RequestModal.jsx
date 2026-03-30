@@ -2,64 +2,83 @@
 import Modal from "./Modal";
 import { useState } from "react";
 
-export default function RequestModal({ program, onClose, onSubmit }) {
+export default function RequestModal({ programName, onClose }) {
   const [formData, setFormData] = useState({
-    persona: "",
     name: "",
-    details: ""
+    email: "",
+    phone: "",
+    message: ""
   });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit({ ...formData, program }); // send back with program preselected
-    onClose();
+    try {
+      const response = await fetch('http://localhost:5000/api/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, programName }),
+      });
+
+      if (response.ok) {
+        onClose();
+      }
+    } catch (err) {
+      console.error('Request error', err);
+    }
   };
 
   return (
     <Modal onClose={onClose}>
       <h3 className="text-xl font-semibold mb-4 text-gray-800">
-        Request Training: {program}
+        Request Training: {programName}
       </h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <select
-          name="persona"
-          value={formData.persona}
-          onChange={handleChange}
-          required
-          className="w-full border p-3 rounded-lg"
-        >
-          <option value="">Who are you?</option>
-          <option>Individual</option>
-          <option>Organization</option>
-          <option>Community</option>
-        </select>
-
         <input
           type="text"
           name="name"
-          placeholder="Name / Organization / Community"
+          placeholder="Your Full Name"
           value={formData.name}
           onChange={handleChange}
           required
-          className="w-full border p-3 rounded-lg"
+          className="w-full border p-3 rounded-lg outline-none focus:ring-2 focus:ring-orange-500"
+        />
+
+        <input
+          type="email"
+          name="email"
+          placeholder="Email Address"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          className="w-full border p-3 rounded-lg outline-none focus:ring-2 focus:ring-orange-500"
+        />
+
+        <input
+          type="text"
+          name="phone"
+          placeholder="Phone Number"
+          value={formData.phone}
+          onChange={handleChange}
+          className="w-full border p-3 rounded-lg outline-none focus:ring-2 focus:ring-orange-500"
         />
 
         <textarea
-          name="details"
-          placeholder="Tell us why you need this training"
-          value={formData.details}
+          name="message"
+          placeholder="Additional details (optional)"
+          value={formData.message}
           onChange={handleChange}
-          className="w-full border p-3 rounded-lg"
+          rows="4"
+          className="w-full border p-3 rounded-lg outline-none focus:ring-2 focus:ring-orange-500"
         />
 
         <button
           type="submit"
-          className="bg-orange-500 hover:bg-orange-600 w-full py-3 rounded-lg text-white font-semibold shadow"
+          className="bg-orange-500 hover:bg-orange-600 w-full py-3 rounded-lg text-white font-semibold shadow-lg transition active:scale-95"
         >
           Submit Request
         </button>

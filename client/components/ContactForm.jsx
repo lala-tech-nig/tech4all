@@ -9,12 +9,23 @@ export default function ContactForm() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    console.log('Contact form', form);
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
-    setForm({ name: '', email: '', phone: '', message: '' });
+    try {
+      const response = await fetch('http://localhost:5000/api/contacts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+
+      if (response.ok) {
+        setSent(true);
+        setTimeout(() => setSent(false), 4000);
+        setForm({ name: '', email: '', phone: '', message: '' });
+      }
+    } catch (err) {
+      console.error('Submission error', err);
+    }
   }
 
   return (

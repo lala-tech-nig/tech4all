@@ -1,7 +1,34 @@
 'use client';
+import { useEffect, useState } from 'react';
 import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
 
 export default function Footer() {
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/settings')
+      .then(res => res.json())
+      .then(data => setSettings(data))
+      .catch(err => console.error('Error fetching settings:', err));
+  }, []);
+
+  const contact = settings?.contact || {
+    address: '12 LALA TECH Hub, Olambe-Akute, Ogun State, Nigeria',
+    phone: '+234 812 144 4306',
+    email: 'lalatechnigltd@gmail.com'
+  };
+
+  const socials = settings?.socials || {
+    facebook: '#',
+    twitter: '#',
+    instagram: '#',
+    youtube: '#'
+  };
+
+  const about = settings?.about || {
+    footer_text: 'Tech4All by LALA TECH — empowering youths and communities worldwide with free technology training.'
+  };
+
   return (
     <footer className="relative bg-gray-950 text-gray-300 overflow-hidden mt-20">
       {/* Background Accent Glow */}
@@ -20,20 +47,22 @@ export default function Footer() {
           </div>
           <p className="text-sm leading-relaxed text-gray-400">
             <span className="font-semibold text-white">Tech4All</span> by LALA TECH — 
-            empowering youths and communities worldwide with free technology training.
+            {about.footer_text}
           </p>
 
           <div className="flex space-x-3 mt-4">
             {[
-              {icon: <FaFacebookF size={16} />, href: "#"},
-              {icon: <FaTwitter size={16} />, href: "#"},
-              {icon: <FaInstagram size={16} />, href: "#"},
-              {icon: <FaYoutube size={16} />, href: "#"},
+              {icon: <FaFacebookF size={16} />, href: socials.facebook},
+              {icon: <FaTwitter size={16} />, href: socials.twitter},
+              {icon: <FaInstagram size={16} />, href: socials.instagram},
+              {icon: <FaYoutube size={16} />, href: socials.youtube},
             ].map((item, i) => (
               <a 
                 key={i} 
                 href={item.href} 
-                className="p-2.5 rounded-full bg-gray-800 hover:bg-orange-500 text-gray-300 hover:text-white transform hover:scale-110 transition duration-300"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`p-2.5 rounded-full bg-gray-800 hover:bg-orange-500 text-gray-300 hover:text-white transform hover:scale-110 transition duration-300 ${item.href === '#' ? 'pointer-events-none opacity-50' : ''}`}
               >
                 {item.icon}
               </a>
@@ -68,9 +97,9 @@ export default function Footer() {
             Contact
             <span className="absolute left-0 -bottom-1 w-12 h-0.5 bg-orange-500 rounded-full animate-pulse"></span>
           </h4>
-          <p className="text-sm">📍 12 LALA TECH Hub, Olambe-Akute, Ogun State, Nigeria</p>
-          <p className="text-sm mt-2">📞 +234 812 144 4306</p>
-          <p className="text-sm mt-1">✉️ lalatechnigltd@gmail.com</p>
+          <p className="text-sm">📍 {contact.address}</p>
+          <p className="text-sm mt-2">📞 {contact.phone}</p>
+          <p className="text-sm mt-1">✉️ {contact.email}</p>
         </div>
 
         {/* Newsletter */}

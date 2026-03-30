@@ -13,46 +13,46 @@ export default function VolunteerCTA() {
   const [showRoles, setShowRoles] = useState(false);
   const [modal, setModal] = useState(null);
   const [confettiActive, setConfettiActive] = useState(false);
+  const [roles, setRoles] = useState([]);
 
-  const roles = [
-    {
-      title: '🎤 Facilitators',
-      desc: `Facilitators are the heart of our training programs. They lead engaging sessions, 
-      simplify complex tech topics, and inspire learners to discover their full potential. 
-      As a facilitator, you’ll empower youths by sharing knowledge, mentoring them, 
-      and sparking curiosity that lasts a lifetime.`
-    },
-    {
-      title: '🛠 Field Support',
-      desc: `Field Support volunteers ensure our training grounds and learning environments 
-      run smoothly. From setting up equipment to assisting participants, you’ll make sure 
-      everyone has the tools and resources to succeed in their training journey.`
-    },
-    {
-      title: '📢 Promoters',
-      desc: `Promoters are our community champions. You’ll spread the word about Tech4All’s 
-      programs and events, both online and offline. With your energy, creativity, and 
-      voice, you’ll help us reach more people and amplify our mission.`
-    },
-    {
-      title: '🤝 Coordinators',
-      desc: `Coordinators oversee program flow, ensuring excellence in execution. You’ll manage 
-      schedules, support facilitators, and create a seamless experience for learners. 
-      Coordinators are the backbone that keeps every program organized and impactful.`
-    }
-  ];
+  useEffect(() => {
+    fetch('http://localhost:5000/api/settings')
+      .then(res => res.json())
+      .then(data => setRoles(data.volunteerRoles))
+      .catch(err => {
+         // Fallback
+         setRoles([
+           { title: 'Facilitators', desc: 'Lead training sessions.' },
+           { title: 'Field Support', desc: 'Ensure logsitics run smoothly.' }
+         ]);
+      });
+  }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const name = e.target.name.value;
+    const email = e.target.email.value;
+    const skills = e.target.skills?.value || '';
 
-    toast.success(`Volunteer application by ${name} received. 🎉`, {
-      duration: 10000,
-    });
+    try {
+      const res = await fetch('http://localhost:5000/api/volunteers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, skills }),
+      });
 
-    setModal(null);
-    setConfettiActive(true);
-    setTimeout(() => setConfettiActive(false), 10000);
+      if (res.ok) {
+        toast.success(`Volunteer application by ${name} received. 🎉`, { duration: 10000 });
+        setModal(null);
+        setConfettiActive(true);
+        setTimeout(() => setConfettiActive(false), 10000);
+        e.target.reset();
+      } else {
+        toast.error('Submission failed. Please try again.');
+      }
+    } catch {
+      toast.error('Could not connect to server. Please try later.');
+    }
   };
 
   return (

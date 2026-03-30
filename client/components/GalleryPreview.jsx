@@ -1,31 +1,43 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Dialog } from "@headlessui/react";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 
-const GALLERIES = [
-  { 
-    id: "g1", 
-    title: "Olambe Akute — Week 1", 
-    desc: "Community ICT training kickoff with exciting engagement and workshops.", 
-    count: 18, 
-    images: ["/events/e1-1.jpg","/events/e1-2.jpg","/events/e2-1.jpg","/events/e2-2.jpg"]
-  },
-  { 
-    id: "g2", 
-    title: "Computer Village Workshop", 
-    desc: "Hands-on device repair and programming sessions with top engineers.", 
-    count: 24, 
-    images: ["/events/e2-1.jpg","/events/e1-2.jpg","/events/e1-1.jpg","/events/e3-1.jpg"]
-  },
-];
-
 export default function GalleryPreview() {
   const [open, setOpen] = useState(false);
   const [activeGallery, setActiveGallery] = useState(null);
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/gallery')
+      .then(res => res.json())
+      .then(data => setImages(data))
+      .catch(() => setImages([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Group images by category to create "Albums"
+  const albums = images.reduce((acc, img) => {
+    const category = img.category || 'General';
+    if (!acc[category]) {
+      acc[category] = {
+        id: category,
+        title: category.charAt(0).toUpperCase() + category.slice(1),
+        desc: `Photos from our ${category} events and activities.`,
+        images: [],
+        count: 0
+      };
+    }
+    acc[category].images.push(img.url);
+    acc[category].count += 1;
+    return acc;
+  }, {});
+
+  const albumList = Object.values(albums);
 
   const openAlbum = (gallery) => {
     setActiveGallery(gallery);
@@ -37,84 +49,106 @@ export default function GalleryPreview() {
       {/* Section Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-2xl font-bold">📸 Photo Gallery</h3>
+          <h3 className="text-2xl font-bold text-gray-900">📸 Photo Gallery</h3>
           <p className="text-sm text-gray-600">Browse event albums and relive the memories.</p>
         </div>
       </div>
 
       {/* Cards */}
-      <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {GALLERIES.map((g) => (
-          <div key={g.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition">
-            {/* Featured Image */}
-            <Image 
-              src={g.images[0]} 
-              alt={g.title} 
-              width={600} 
-              height={400} 
-              className="w-full h-56 object-cover"
-            />
+      {loading ? (
+        <div className="py-20 text-center text-gray-400">Loading gallery...</div>
+      ) : albumList.length > 0 ? (
+        <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {albumList.map((g) => (
+            <div key={g.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition group">
+              {/* Featured Image */}
+              <div className="relative h-56 w-full overflow-hidden">
+                <Image 
+                  src={g.images[0]} 
+                  alt={g.title} 
+                  fill
+                  className="object-cover transition duration-500 group-hover:scale-110"
+                />
+              </div>
 
-            {/* Description */}
-            <div className="p-5">
-              <h4 className="font-semibold text-lg">{g.title}</h4>
-              <p className="text-sm text-gray-600 mt-1">{g.desc}</p>
-              <div className="text-xs text-gray-500 mt-2">{g.count} photos</div>
+              {/* Description */}
+              <div className="p-5">
+                <h4 className="font-semibold text-lg text-gray-900">{g.title}</h4>
+                <p className="text-sm text-gray-600 mt-1 line-clamp-2">{g.desc}</p>
+                <div className="text-[10px] uppercase font-black tracking-widest text-orange-500 mt-2">
+                  {g.count} photos
+                </div>
 
-              <button 
-                onClick={() => openAlbum(g)} 
-                className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition"
-              >
-                Open Album
-              </button>
+                <button 
+                  onClick={() => openAlbum(g)} 
+                  className="mt-4 px-6 py-2 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-600 transition shadow-lg shadow-orange-500/20 active:scale-95"
+                >
+                  Open Album
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-8 py-20 text-center border-2 border-dashed rounded-3xl bg-gray-50 text-gray-400">
+           No photos in the gallery yet. Start adding some from the admin dashboard!
+        </div>
+      )}
 
-      {/* View Full Gallery */}
+      {/* View Full Gallery Link */}
       <div className="flex justify-center mt-10">
         <Link 
           href="/gallery" 
-          className="px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-orange-600 transition"
+          className="px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-orange-600 transition shadow-lg shadow-gray-900/10"
         >
           View Full Gallery →
         </Link>
       </div>
 
       {/* Modal for Viewing Album */}
-      <Dialog open={open} onClose={() => setOpen(false)} className="relative z-50">
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" aria-hidden="true" />
+      <Dialog open={open} onClose={() => setOpen(false)} className="relative z-[60]">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="bg-white rounded-xl max-w-4xl w-full p-6 overflow-y-auto max-h-[90vh]">
+          <Dialog.Panel className="bg-white rounded-2xl max-w-4xl w-full p-8 overflow-y-auto max-h-[90vh] shadow-2xl scale-in-center">
             {activeGallery && (
               <>
-                <Dialog.Title className="text-xl font-bold mb-4">{activeGallery.title}</Dialog.Title>
-                <p className="text-sm text-gray-600 mb-6">{activeGallery.desc}</p>
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <Dialog.Title className="text-2xl font-bold text-gray-900">{activeGallery.title}</Dialog.Title>
+                    <p className="text-sm text-gray-500">{activeGallery.desc}</p>
+                  </div>
+                  <button 
+                    onClick={() => setOpen(false)} 
+                    className="p-2 text-gray-400 hover:text-orange-500 transition"
+                  >
+                    <span className="text-2xl">✖</span>
+                  </button>
+                </div>
 
                 {/* Image Lightbox */}
                 <PhotoProvider>
-                  <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {activeGallery.images.map((img, idx) => (
                       <PhotoView key={idx} src={img}>
-                        <Image
-                          src={img}
-                          alt={`${activeGallery.title}-${idx}`}
-                          width={400}
-                          height={300}
-                          className="w-full h-40 object-cover rounded-lg cursor-pointer"
-                        />
+                        <div className="relative h-40 w-full rounded-xl overflow-hidden cursor-zoom-in group">
+                          <Image
+                            src={img}
+                            alt={`${activeGallery.title}-${idx}`}
+                            fill
+                            className="object-cover transition duration-500 group-hover:scale-110"
+                          />
+                        </div>
                       </PhotoView>
                     ))}
                   </div>
                 </PhotoProvider>
 
-                <div className="mt-6 flex justify-end">
+                <div className="mt-8 flex justify-center">
                   <button 
                     onClick={() => setOpen(false)} 
-                    className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition"
+                    className="px-8 py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition"
                   >
-                    Close
+                    Close Album
                   </button>
                 </div>
               </>
