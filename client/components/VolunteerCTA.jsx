@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Lottie from "lottie-react";
 import wavingHand from "../public/lotties/hand-wave.json";
