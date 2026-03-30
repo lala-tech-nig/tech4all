@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "@/utils/api";
 import Image from "next/image";
 import Link from "next/link";
 import { Dialog } from "@headlessui/react";
@@ -13,7 +14,7 @@ export default function GalleryPreview() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/gallery')
+    fetch(`${API_BASE_URL}/gallery`)
       .then(res => res.json())
       .then(data => setImages(data))
       .catch(() => setImages([]))

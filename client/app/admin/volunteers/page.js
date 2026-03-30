@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/utils/api';
 import { Search, Trash2, CheckCircle, XCircle, Mail, Clock, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -12,7 +13,7 @@ export default function AdminVolunteers() {
 
   const fetchVolunteers = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/volunteers', {
+      const res = await fetch(`${API_BASE_URL}/volunteers`, {
         headers: { Authorization: `Bearer ${token()}` }
       });
       setVolunteers(await res.json());
@@ -24,7 +25,7 @@ export default function AdminVolunteers() {
 
   const updateStatus = async (id, status) => {
     try {
-      await fetch(`http://localhost:5000/api/volunteers/${id}`, {
+      await fetch(`${API_BASE_URL}/volunteers/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({ status, isRead: true }),
@@ -37,7 +38,7 @@ export default function AdminVolunteers() {
   const handleDelete = async (id) => {
     if (!confirm('Delete this volunteer application?')) return;
     try {
-      await fetch(`http://localhost:5000/api/volunteers/${id}`, {
+      await fetch(`${API_BASE_URL}/volunteers/${id}`, {
         method: 'DELETE', headers: { Authorization: `Bearer ${token()}` }
       });
       toast.success('Deleted'); fetchVolunteers();

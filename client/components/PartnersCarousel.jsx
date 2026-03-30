@@ -1,11 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { API_BASE_URL } from '@/utils/api';
 
 export default function PartnersCarousel() {
   const [partners, setPartners] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/partners')
+    fetch(`${API_BASE_URL}/partners`)
       .then(res => res.json())
       .then(data => setPartners(data))
       .catch(() => {

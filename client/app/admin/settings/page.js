@@ -21,6 +21,7 @@ import {
   Info
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { API_BASE_URL } from '@/utils/api';
 
 export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -46,7 +47,7 @@ export default function AdminSettings() {
 
   const fetchSettings = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/settings');
+      const res = await fetch(`${API_BASE_URL}/settings`);
       const data = await res.json();
       setSiteForm(data);
     } catch (err) {
@@ -68,7 +69,7 @@ export default function AdminSettings() {
   const handleUpdateSite = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:5000/api/settings', {
+      const res = await fetch(`${API_BASE_URL}/settings`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',

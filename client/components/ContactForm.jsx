@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { API_BASE_URL } from '@/utils/api';
 
 export default function ContactForm() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
@@ -12,7 +13,7 @@ export default function ContactForm() {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/contacts', {
+      const response = await fetch(`${API_BASE_URL}/contacts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

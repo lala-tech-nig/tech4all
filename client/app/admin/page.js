@@ -21,11 +21,10 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState(STATS);
   const [loading, setLoading] = useState(true);
 
-  // In a real app, you would fetch these from http://localhost:5000/api/donations/stats etc.
+  // In a real app, you would fetch these from `${API_BASE_URL}/donations/stats` etc.
   useEffect(() => {
     setTimeout(() => setLoading(false), 800);
   }, []);
-
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex items-center justify-between">

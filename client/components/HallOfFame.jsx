@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "@/utils/api";
 import Link from "next/link";
 
 export default function HallOfFamePage() {
@@ -12,7 +13,7 @@ export default function HallOfFamePage() {
   const categories = ["volunteer", "community", "organization", "donor"];
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/hall-of-fame')
+    fetch(`${API_BASE_URL}/hall-of-fame`)
       .then(res => res.json())
       .then(data => setEntries(data))
       .catch(() => setEntries([]))

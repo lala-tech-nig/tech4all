@@ -1,5 +1,6 @@
 'use client'; 
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/utils/api';
 import { motion } from 'framer-motion';
 import Modal from './Modal';
 import RequestModal from './RequestModal';
@@ -11,7 +12,7 @@ export default function ProgramsSection() {
   const [requestProgram, setRequestProgram] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/courses')
+    fetch(`${API_BASE_URL}/courses`)
       .then(res => res.json())
       .then(data => setPrograms(data))
       .catch(err => console.error('Error fetching programs:', err));

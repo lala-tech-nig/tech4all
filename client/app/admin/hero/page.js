@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/utils/api';
 import { Plus, Pencil, Trash2, Image as ImageIcon, X, ToggleLeft, ToggleRight, GripVertical } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -16,7 +17,7 @@ export default function AdminHero() {
 
   const fetchSlides = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/hero-slides?admin=true');
+      const res = await fetch(`${API_BASE_URL}/hero-slides?admin=true`);
       setSlides(await res.json());
     } catch { toast.error('Failed to load slides'); }
     finally { setLoading(false); }
@@ -30,8 +31,8 @@ export default function AdminHero() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const url = editing
-      ? `http://localhost:5000/api/hero-slides/${editing._id}`
-      : 'http://localhost:5000/api/hero-slides';
+      ? `${API_BASE_URL}/hero-slides/${editing._id}`
+      : `${API_BASE_URL}/hero-slides`;
     const method = editing ? 'PUT' : 'POST';
     try {
       const res = await fetch(url, {
@@ -47,7 +48,7 @@ export default function AdminHero() {
   const handleDelete = async (id) => {
     if (!confirm('Delete this slide?')) return;
     try {
-      await fetch(`http://localhost:5000/api/hero-slides/${id}`, {
+      await fetch(`${API_BASE_URL}/hero-slides/${id}`, {
         method: 'DELETE', headers: { Authorization: `Bearer ${token()}` }
       });
       toast.success('Deleted'); fetchSlides();
@@ -56,7 +57,7 @@ export default function AdminHero() {
 
   const toggleActive = async (slide) => {
     try {
-      await fetch(`http://localhost:5000/api/hero-slides/${slide._id}`, {
+      await fetch(`${API_BASE_URL}/hero-slides/${slide._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({ ...slide, isActive: !slide.isActive }),

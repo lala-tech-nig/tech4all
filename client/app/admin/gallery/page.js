@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/utils/api';
 import { 
   Plus, 
   Trash2, 
@@ -24,7 +25,7 @@ export default function AdminGallery() {
 
   const fetchImages = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/gallery');
+      const response = await fetch(`${API_BASE_URL}/gallery`);
       const data = await response.json();
       setImages(data);
     } catch (err) {
@@ -41,7 +42,7 @@ export default function AdminGallery() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/gallery', {
+      const response = await fetch(`${API_BASE_URL}/gallery`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -64,7 +65,7 @@ export default function AdminGallery() {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this image?')) return;
     try {
-      await fetch(`http://localhost:5000/api/gallery/${id}`, {
+      await fetch(`${API_BASE_URL}/gallery/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
       });

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/utils/api';
 import { 
   Plus, 
   Pencil, 
@@ -28,7 +29,7 @@ export default function AdminCourses() {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/courses?admin=true');
+      const response = await fetch(`${API_BASE_URL}/courses?admin=true`);
       const data = await response.json();
       setCourses(data);
     } catch (err) {
@@ -45,8 +46,8 @@ export default function AdminCourses() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const url = editingCourse 
-      ? `http://localhost:5000/api/courses/${editingCourse._id}` 
-      : 'http://localhost:5000/api/courses';
+      ? `${API_BASE_URL}/courses/${editingCourse._id}` 
+      : `${API_BASE_URL}/courses`;
     const method = editingCourse ? 'PUT' : 'POST';
 
     try {
@@ -80,7 +81,7 @@ export default function AdminCourses() {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this course?')) return;
     try {
-      await fetch(`http://localhost:5000/api/courses/${id}`, {
+      await fetch(`${API_BASE_URL}/courses/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
       });

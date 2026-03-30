@@ -11,6 +11,7 @@ import {
   MoreVertical
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { API_BASE_URL } from '@/utils/api';
 
 export default function AdminContacts() {
   const [contacts, setContacts] = useState([]);
@@ -19,7 +20,7 @@ export default function AdminContacts() {
 
   const fetchContacts = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/contacts', {
+      const response = await fetch(`${API_BASE_URL}/contacts`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
       });
       const data = await response.json();
@@ -38,7 +39,7 @@ export default function AdminContacts() {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this contact?')) return;
     try {
-      await fetch(`http://localhost:5000/api/contacts/${id}`, {
+      await fetch(`${API_BASE_URL}/contacts/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
       });
@@ -51,7 +52,7 @@ export default function AdminContacts() {
 
   const markAsRead = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/contacts/${id}/read`, {
+      await fetch(`${API_BASE_URL}/contacts/${id}/read`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
       });

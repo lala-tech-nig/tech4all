@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/utils/api';
 import { Plus, Pencil, Trash2, X, ExternalLink, ToggleLeft, ToggleRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -16,7 +17,7 @@ export default function AdminPartners() {
 
   const fetchPartners = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/partners?admin=true');
+      const res = await fetch(`${API_BASE_URL}/partners?admin=true`);
       setPartners(await res.json());
     } catch { toast.error('Failed to load partners'); }
     finally { setLoading(false); }
@@ -30,8 +31,8 @@ export default function AdminPartners() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const url = editing
-      ? `http://localhost:5000/api/partners/${editing._id}`
-      : 'http://localhost:5000/api/partners';
+      ? `${API_BASE_URL}/partners/${editing._id}`
+      : `${API_BASE_URL}/partners`;
     const method = editing ? 'PUT' : 'POST';
     try {
       const res = await fetch(url, {
@@ -46,7 +47,7 @@ export default function AdminPartners() {
   const handleDelete = async (id) => {
     if (!confirm('Remove this partner?')) return;
     try {
-      await fetch(`http://localhost:5000/api/partners/${id}`, {
+      await fetch(`${API_BASE_URL}/partners/${id}`, {
         method: 'DELETE', headers: { Authorization: `Bearer ${token()}` }
       });
       toast.success('Removed'); fetchPartners();
@@ -55,7 +56,7 @@ export default function AdminPartners() {
 
   const toggleActive = async (partner) => {
     try {
-      await fetch(`http://localhost:5000/api/partners/${partner._id}`, {
+      await fetch(`${API_BASE_URL}/partners/${partner._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({ ...partner, isActive: !partner.isActive }),

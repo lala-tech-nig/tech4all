@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "@/utils/api";
 import { motion } from "framer-motion";
 import Lottie from "lottie-react";
 import wavingHand from "../public/lotties/hand-wave.json";
@@ -16,7 +17,7 @@ export default function VolunteerCTA() {
   const [roles, setRoles] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/settings')
+    fetch(`${API_BASE_URL}/settings`)
       .then(res => res.json())
       .then(data => setRoles(data.volunteerRoles))
       .catch(err => {
@@ -35,7 +36,7 @@ export default function VolunteerCTA() {
     const skills = e.target.skills?.value || '';
 
     try {
-      const res = await fetch('http://localhost:5000/api/volunteers', {
+      const res = await fetch(`${API_BASE_URL}/volunteers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, skills }),

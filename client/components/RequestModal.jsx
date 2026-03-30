@@ -1,6 +1,7 @@
 "use client";
 import Modal from "./Modal";
 import { useState } from "react";
+import { API_BASE_URL } from "@/utils/api";
 
 export default function RequestModal({ programName, onClose }) {
   const [formData, setFormData] = useState({
@@ -17,7 +18,7 @@ export default function RequestModal({ programName, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/requests', {
+      const response = await fetch(`${API_BASE_URL}/requests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, programName }),

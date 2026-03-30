@@ -12,6 +12,7 @@ import {
   GraduationCap
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { API_BASE_URL } from '@/utils/api';
 
 export default function AdminRequests() {
   const [requests, setRequests] = useState([]);
@@ -20,7 +21,7 @@ export default function AdminRequests() {
 
   const fetchRequests = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/requests', {
+      const response = await fetch(`${API_BASE_URL}/requests`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
       });
       const data = await response.json();
@@ -38,7 +39,7 @@ export default function AdminRequests() {
 
   const updateStatus = async (id, status) => {
     try {
-      await fetch(`http://localhost:5000/api/requests/${id}`, {
+      await fetch(`${API_BASE_URL}/requests/${id}`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',

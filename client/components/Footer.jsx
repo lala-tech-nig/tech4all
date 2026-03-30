@@ -1,12 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { API_BASE_URL } from '@/utils/api';
 import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
 
 export default function Footer() {
   const [settings, setSettings] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/settings')
+    fetch(`${API_BASE_URL}/settings`)
       .then(res => res.json())
       .then(data => setSettings(data))
       .catch(err => console.error('Error fetching settings:', err));

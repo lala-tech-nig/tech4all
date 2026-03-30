@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "@/utils/api";
 import Image from "next/image";
 import { Typewriter } from "react-simple-typewriter";
 import ReusableModal from "./ReusableModal";
@@ -13,7 +14,7 @@ export default function HeroCarousel() {
   const [confetti, setConfetti] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/hero-slides')
+    fetch(`${API_BASE_URL}/hero-slides`)
       .then(res => res.json())
       .then(data => setSlides(data))
       .catch(() => {
@@ -41,13 +42,13 @@ export default function HeroCarousel() {
 
     try {
       if (type === 'volunteer') {
-        await fetch('http://localhost:5000/api/volunteers', {
+        await fetch(`${API_BASE_URL}/volunteers`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, skills }),
         });
       } else if (type === 'training') {
-        await fetch('http://localhost:5000/api/requests', {
+        await fetch(`${API_BASE_URL}/requests`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email: email || `${name.replace(/\s+/g,'').toLowerCase()}@request.com`, programName: persona || 'General Training', message: details }),

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/utils/api';
 import { Plus, Pencil, Trash2, X, Star, ToggleLeft, ToggleRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -18,7 +19,7 @@ export default function AdminHallOfFame() {
 
   const fetchEntries = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/hall-of-fame?admin=true');
+      const res = await fetch(`${API_BASE_URL}/hall-of-fame?admin=true`);
       setEntries(await res.json());
     } catch { toast.error('Failed to load entries'); }
     finally { setLoading(false); }
@@ -32,8 +33,8 @@ export default function AdminHallOfFame() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const url = editing
-      ? `http://localhost:5000/api/hall-of-fame/${editing._id}`
-      : 'http://localhost:5000/api/hall-of-fame';
+      ? `${API_BASE_URL}/hall-of-fame/${editing._id}`
+      : `${API_BASE_URL}/hall-of-fame`;
     const method = editing ? 'PUT' : 'POST';
     try {
       const res = await fetch(url, {
@@ -48,7 +49,7 @@ export default function AdminHallOfFame() {
   const handleDelete = async (id) => {
     if (!confirm('Delete this entry?')) return;
     try {
-      await fetch(`http://localhost:5000/api/hall-of-fame/${id}`, {
+      await fetch(`${API_BASE_URL}/hall-of-fame/${id}`, {
         method: 'DELETE', headers: { Authorization: `Bearer ${token()}` }
       });
       toast.success('Deleted'); fetchEntries();
@@ -57,7 +58,7 @@ export default function AdminHallOfFame() {
 
   const toggleActive = async (entry) => {
     try {
-      await fetch(`http://localhost:5000/api/hall-of-fame/${entry._id}`, {
+      await fetch(`${API_BASE_URL}/hall-of-fame/${entry._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({ ...entry, isActive: !entry.isActive }),

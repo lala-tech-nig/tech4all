@@ -13,6 +13,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { API_BASE_URL } from '@/utils/api';
 
 export default function AdminDonations() {
   const [donations, setDonations] = useState([]);
@@ -25,8 +26,8 @@ export default function AdminDonations() {
       const authHeader = { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` };
       
       const [donationsRes, statsRes] = await Promise.all([
-        fetch('http://localhost:5000/api/donations', { headers: authHeader }),
-        fetch('http://localhost:5000/api/donations/stats', { headers: authHeader })
+        fetch(`${API_BASE_URL}/donations`, { headers: authHeader }),
+        fetch(`${API_BASE_URL}/donations/stats`, { headers: authHeader })
       ]);
       
       const [donationsData, statsData] = await Promise.all([
