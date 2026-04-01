@@ -12,6 +12,8 @@ export default function AdminHero() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const token = () => localStorage.getItem('adminToken');
 
@@ -23,26 +25,81 @@ export default function AdminHero() {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchSlides(); }, []);
+  useEffect(() => { 
+    fetchSlides();
+    return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
+  }, [previewUrl]);
 
-  const openCreate = () => { setEditing(null); setForm(EMPTY_FORM); setIsModalOpen(true); };
-  const openEdit = (slide) => { setEditing(slide); setForm(slide); setIsModalOpen(true); };
+  const openCreate = () => { 
+    setEditing(null); 
+    setForm(EMPTY_FORM); 
+    setIsModalOpen(true); 
+    setFile(null);
+    setPreviewUrl(null);
+  };
+  const openEdit = (slide) => { 
+    setEditing(slide); 
+    setForm(slide); 
+    setIsModalOpen(true); 
+    setFile(null);
+    setPreviewUrl(null);
+  };
+
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(URL.createObjectURL(selectedFile));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     const url = editing
       ? `${API_BASE_URL}/hero-slides/${editing._id}`
       : `${API_BASE_URL}/hero-slides`;
     const method = editing ? 'PUT' : 'POST';
+    
+    if (!editing && !file) {
+      setSubmitting(false);
+      return toast.error('Please select an image file');
+    }
+
+    const formData = new FormData();
+    if (file) formData.append('image', file);
+    formData.append('title', form.title);
+    formData.append('subtitle', form.subtitle);
+    formData.append('order', form.order);
+    formData.append('isActive', form.isActive);
+
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
-        body: JSON.stringify(form),
+        headers: { Authorization: `Bearer ${token()}` },
+        body: formData,
       });
-      if (res.ok) { toast.success(editing ? 'Slide updated' : 'Slide created'); setIsModalOpen(false); fetchSlides(); }
-      else toast.error('Save failed');
-    } catch { toast.error('Server error'); }
+      if (res.ok) {
+        toast.success(editing ? 'Slide updated' : 'Slide created');
+        setIsModalOpen(false);
+        setFile(null);
+        setPreviewUrl(null);
+        fetchSlides();
+      } else if (res.status === 401) {
+        toast.error('Session expired. Please login again.');
+        localStorage.removeItem('adminToken');
+        window.location.href = '/admin/login';
+      } else {
+        toast.error('Save failed');
+      }
+    } catch {
+      toast.error('Server error');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -119,8 +176,36 @@ export default function AdminHero() {
             <h2 className="text-xl font-bold mb-6">{editing ? 'Edit Slide' : 'New Hero Slide'}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                <input required className="w-full border rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-orange-500 text-sm" placeholder="/hero1.jpg or https://..." value={form.src} onChange={(e) => setForm({ ...form, src: e.target.value })} />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Upload Banner Image {editing && '(leave empty to keep current)'}</label>
+                
+                {previewUrl ? (
+                  <div className="relative w-full h-40 mb-3 rounded-xl overflow-hidden border-2 border-orange-500/30 group">
+                    <img src={previewUrl} className="w-full h-full object-cover" />
+                    <button 
+                      type="button" 
+                      onClick={() => { setFile(null); setPreviewUrl(null); }}
+                      className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition shadow-lg"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : editing?.src ? (
+                   <div className="relative w-full h-40 mb-3 rounded-xl overflow-hidden border border-gray-200">
+                    <img src={editing.src} className="w-full h-full object-cover opacity-50 grayscale-[50%]" />
+                    <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-gray-500 bg-gray-50/50">Current Image</div>
+                  </div>
+                ) : null}
+
+                <div className="relative">
+                  <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                  <input 
+                    required={!editing}
+                    type="file"
+                    accept="image/*"
+                    className="w-full border rounded-lg pl-10 pr-4 py-2 outline-none focus:ring-2 focus:ring-orange-500 transition text-sm file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                    onChange={handleFileChange} 
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
@@ -142,8 +227,12 @@ export default function AdminHero() {
                   </label>
                 </div>
               </div>
-              <button type="submit" className="w-full bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition mt-2">
-                {editing ? 'Save Changes' : 'Publish Slide'}
+               <button 
+                disabled={submitting}
+                type="submit" 
+                className={`w-full font-bold py-3 rounded-lg transition mt-2 shadow-lg ${submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/20 active:scale-[0.98]'}`}
+              >
+                {submitting ? 'Processing...' : editing ? 'Save Changes' : 'Publish Slide'}
               </button>
             </form>
           </div>

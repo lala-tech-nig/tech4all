@@ -38,16 +38,20 @@ export default function ProgramsSection() {
             viewport={{ once: true }}
             className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2"
           >
-            <div className="relative h-48 w-full">
+            <div className="relative h-48 w-full group">
               <video 
                 src={p.videoUrl || p.video} 
+                poster={p.imageUrl}
                 autoPlay 
                 loop 
                 muted 
                 playsInline 
-                className="object-cover h-full w-full"
+                className="object-cover h-full w-full opacity-80 group-hover:opacity-100 transition duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              {!p.videoUrl && !p.video && p.imageUrl && (
+                <img src={p.imageUrl} className="absolute inset-0 w-full h-full object-cover" alt={p.title} />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <h4 className="absolute bottom-3 left-4 text-xl font-bold text-white">{p.title}</h4>
             </div>
             <div className="p-6 flex flex-col justify-between h-44">

@@ -12,6 +12,7 @@ export default function AdminPartners() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const token = () => localStorage.getItem('adminToken');
 
@@ -23,25 +24,83 @@ export default function AdminPartners() {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchPartners(); }, []);
+  useEffect(() => { 
+    fetchPartners(); 
+    return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
+  }, [previewUrl]);
 
-  const openCreate = () => { setEditing(null); setForm(EMPTY_FORM); setIsModalOpen(true); };
-  const openEdit = (partner) => { setEditing(partner); setForm(partner); setIsModalOpen(true); };
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(URL.createObjectURL(selectedFile));
+    }
+  };
+
+  const openCreate = () => { 
+    setEditing(null); 
+    setForm(EMPTY_FORM); 
+    setIsModalOpen(true); 
+    setFile(null);
+    setPreviewUrl(null);
+  };
+  const openEdit = (partner) => { 
+    setEditing(partner); 
+    setForm(partner); 
+    setIsModalOpen(true); 
+    setFile(null);
+    setPreviewUrl(null);
+  };
+
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     const url = editing
       ? `${API_BASE_URL}/partners/${editing._id}`
       : `${API_BASE_URL}/partners`;
     const method = editing ? 'PUT' : 'POST';
+    
+    if (!editing && !file) {
+      setSubmitting(false);
+      return toast.error('Please select a logo image');
+    }
+
+    const formData = new FormData();
+    if (file) formData.append('logo', file);
+    formData.append('name', form.name);
+    formData.append('website', form.website);
+    formData.append('order', form.order);
+    formData.append('isActive', form.isActive);
+
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
-        body: JSON.stringify(form),
+        headers: { Authorization: `Bearer ${token()}` },
+        body: formData,
       });
-      if (res.ok) { toast.success(editing ? 'Partner updated' : 'Partner added'); setIsModalOpen(false); fetchPartners(); }
-    } catch { toast.error('Server error'); }
+      if (res.ok) {
+        toast.success(editing ? 'Partner updated' : 'Partner added');
+        setIsModalOpen(false);
+        setFile(null);
+        setPreviewUrl(null);
+        fetchPartners();
+      } else if (res.status === 401) {
+        toast.error('Session expired. Please login again.');
+        localStorage.removeItem('adminToken');
+        window.location.href = '/admin/login';
+      } else {
+        toast.error('Save failed');
+      }
+    } catch {
+      toast.error('Server error');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -120,8 +179,33 @@ export default function AdminPartners() {
                 <input required className="w-full border rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-orange-500 text-sm" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Logo URL</label>
-                <input required className="w-full border rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-orange-500 text-sm" placeholder="/partners/logo.png or https://..." value={form.logoUrl} onChange={(e) => setForm({ ...form, logoUrl: e.target.value })} />
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Upload Logo {editing && '(leave empty to keep current)'}</label>
+                
+                {previewUrl ? (
+                  <div className="relative w-full h-24 mb-3 rounded-xl overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center group">
+                    <img src={previewUrl} className="max-h-20 max-w-[80%] object-contain px-4" />
+                    <button 
+                      type="button" 
+                      onClick={() => { setFile(null); setPreviewUrl(null); }}
+                      className="absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition shadow-lg"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ) : editing?.logoUrl ? (
+                   <div className="relative w-full h-24 mb-3 rounded-xl overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center opacity-50 grayscale-[50%]">
+                    <img src={editing.logoUrl} className="max-h-20 max-w-[80%] object-contain px-4" />
+                    <div className="absolute inset-0 flex items-center justify-center text-[8px] font-black uppercase tracking-widest text-gray-500 bg-gray-50/30 font-bold">Current Logo</div>
+                  </div>
+                ) : null}
+
+                <input 
+                  required={!editing}
+                  type="file" 
+                  accept="image/*"
+                  className="w-full border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-orange-500 text-sm file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" 
+                  onChange={handleFileChange} 
+                />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Website (optional)</label>
@@ -139,8 +223,12 @@ export default function AdminPartners() {
                   </label>
                 </div>
               </div>
-              <button type="submit" className="w-full bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition mt-2">
-                {editing ? 'Save Changes' : 'Add Partner'}
+              <button 
+                disabled={submitting}
+                type="submit" 
+                className={`w-full font-bold py-3 rounded-lg transition mt-2 shadow-lg ${submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/20 active:scale-[0.98]'}`}
+              >
+                {submitting ? 'Updating...' : (editing ? 'Save Changes' : 'Add Partner')}
               </button>
             </form>
           </div>

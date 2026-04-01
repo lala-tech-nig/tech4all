@@ -14,15 +14,30 @@ router.get('/', async (req, res) => {
   }
 });
 
+const { upload } = require('../utils/cloudinary');
+
 // @route   POST /api/gallery
 // @desc    Add a gallery image (Admin)
-router.post('/', auth, async (req, res) => {
+// Expects 'image' file field + other data in body
+router.post('/', [auth, upload.single('image')], async (req, res) => {
   try {
-    const newImage = new GalleryImage(req.body);
+    const { caption, category } = req.body;
+    
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image file uploaded' });
+    }
+
+    const newImage = new GalleryImage({
+      url: req.file.path, // Cloudinary secure_url provided by multer-storage-cloudinary
+      caption,
+      category
+    });
+    
     await newImage.save();
     res.status(201).json(newImage);
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error(err);
+    res.status(500).json({ message: 'Server upload error' });
   }
 });
 

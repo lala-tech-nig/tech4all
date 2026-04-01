@@ -135,10 +135,11 @@ export default function Navbar() {
               </button>
               <button
                 onClick={() => setModal("donate")}
-                className="px-6 py-2.5 bg-orange-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-orange-500/20 hover:bg-orange-600 hover:shadow-orange-500/40 transform hover:-translate-y-0.5 transition active:scale-95 flex items-center gap-2"
+                className="group relative px-6 py-2.5 bg-orange-600 text-white text-sm font-bold rounded-xl shadow-[0_10px_20px_-5px_rgba(234,88,12,0.3)] hover:shadow-[0_15px_25px_-5px_rgba(234,88,12,0.4)] hover:-translate-y-0.5 transition-all active:scale-95 flex items-center gap-2"
               >
-                <Heart size={16} fill="currentColor" />
+                <Heart size={16} className="group-hover:scale-125 transition-transform" fill="currentColor" />
                 <span>Donate</span>
+                <div className="absolute inset-0 rounded-xl ring-2 ring-orange-500 ring-offset-2 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
           </div>
 
@@ -207,7 +208,7 @@ export default function Navbar() {
         <VolunteerModal onClose={() => setModal(null)} onSubmit={(name) => handleSubmit("volunteer", name)} />
       )}
       {modal === "donate" && (
-        <DonateModal onClose={() => setModal(null)} onDonate={handleDonate} />
+        <DonateModal onClose={() => setModal(null)} />
       )}
     </>
   );

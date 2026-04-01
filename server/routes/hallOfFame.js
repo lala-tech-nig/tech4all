@@ -15,24 +15,35 @@ router.get('/', async (req, res) => {
   }
 });
 
+const { upload } = require('../utils/cloudinary');
+
 // POST create entry (Admin)
-router.post('/', auth, async (req, res) => {
+router.post('/', [auth, upload.single('photo')], async (req, res) => {
   try {
-    const entry = new HallOfFameEntry(req.body);
+    const entryData = { ...req.body };
+    if (req.file) {
+      entryData.photo = req.file.path;
+    }
+    const entry = new HallOfFameEntry(entryData);
     await entry.save();
     res.status(201).json(entry);
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error(err);
+    res.status(500).json({ message: 'Upload failed' });
   }
 });
 
 // PUT update entry (Admin)
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', [auth, upload.single('photo')], async (req, res) => {
   try {
-    const entry = await HallOfFameEntry.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const entryData = { ...req.body };
+    if (req.file) {
+      entryData.photo = req.file.path;
+    }
+    const entry = await HallOfFameEntry.findByIdAndUpdate(req.params.id, entryData, { new: true });
     res.json(entry);
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Update failed' });
   }
 });
 

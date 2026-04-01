@@ -14,24 +14,50 @@ router.get('/', async (req, res) => {
   }
 });
 
+const { upload } = require('../utils/cloudinary');
+
 // POST create slide (Admin)
-router.post('/', auth, async (req, res) => {
+router.post('/', [auth, upload.single('image')], async (req, res) => {
   try {
-    const slide = new HeroSlide(req.body);
+    const { title, subtitle, order, isActive } = req.body;
+    
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image uploaded' });
+    }
+
+    const slide = new HeroSlide({
+      src: req.file.path,
+      title,
+      subtitle,
+      order: parseInt(order),
+      isActive: isActive === 'true' // FormData sends boolean as string
+    });
+    
     await slide.save();
     res.status(201).json(slide);
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error(err);
+    res.status(500).json({ message: 'Upload failed' });
   }
 });
 
 // PUT update slide (Admin)
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', [auth, upload.single('image')], async (req, res) => {
   try {
-    const slide = await HeroSlide.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updateData = { ...req.body };
+    if (req.file) {
+      updateData.src = req.file.path;
+    }
+    
+    // Convert boolean string if present
+    if (updateData.isActive) {
+      updateData.isActive = updateData.isActive === 'true';
+    }
+
+    const slide = await HeroSlide.findByIdAndUpdate(req.params.id, updateData, { new: true });
     res.json(slide);
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Update failed' });
   }
 });
 

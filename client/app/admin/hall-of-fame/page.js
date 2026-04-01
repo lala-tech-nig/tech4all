@@ -14,6 +14,7 @@ export default function AdminHallOfFame() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const token = () => localStorage.getItem('adminToken');
 
@@ -25,25 +26,87 @@ export default function AdminHallOfFame() {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchEntries(); }, []);
+  useEffect(() => { 
+    fetchEntries(); 
+    return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
+  }, [previewUrl]);
 
-  const openCreate = () => { setEditing(null); setForm(EMPTY_FORM); setIsModalOpen(true); };
-  const openEdit = (entry) => { setEditing(entry); setForm(entry); setIsModalOpen(true); };
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(URL.createObjectURL(selectedFile));
+    }
+  };
+
+  const openCreate = () => { 
+    setEditing(null); 
+    setForm(EMPTY_FORM); 
+    setIsModalOpen(true); 
+    setFile(null);
+    setPreviewUrl(null);
+  };
+  const openEdit = (entry) => { 
+    setEditing(entry); 
+    setForm(entry); 
+    setIsModalOpen(true); 
+    setFile(null);
+    setPreviewUrl(null);
+  };
+
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     const url = editing
       ? `${API_BASE_URL}/hall-of-fame/${editing._id}`
       : `${API_BASE_URL}/hall-of-fame`;
     const method = editing ? 'PUT' : 'POST';
+    
+    if (!editing && !file) {
+      setSubmitting(false);
+      return toast.error('Please select a photo');
+    }
+
+    const formData = new FormData();
+    if (file) formData.append('photo', file);
+    formData.append('name', form.name);
+    formData.append('title', form.title);
+    formData.append('bio', form.bio);
+    formData.append('badge', form.badge);
+    formData.append('category', form.category);
+    formData.append('rating', form.rating);
+    formData.append('joined', form.joined);
+    formData.append('isActive', form.isActive);
+
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
-        body: JSON.stringify(form),
+        headers: { Authorization: `Bearer ${token()}` },
+        body: formData,
       });
-      if (res.ok) { toast.success(editing ? 'Entry updated' : 'Entry added'); setIsModalOpen(false); fetchEntries(); }
-    } catch { toast.error('Server error'); }
+      if (res.ok) {
+        toast.success(editing ? 'Entry updated' : 'Entry added');
+        setIsModalOpen(false);
+        setFile(null);
+        setPreviewUrl(null);
+        fetchEntries();
+      } else if (res.status === 401) {
+        toast.error('Session expired. Please login again.');
+        localStorage.removeItem('adminToken');
+        window.location.href = '/admin/login';
+      } else {
+        toast.error('Save failed');
+      }
+    } catch {
+      toast.error('Server error');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -142,8 +205,33 @@ export default function AdminHallOfFame() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Photo URL</label>
-                <input required className="w-full border rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-orange-500 text-sm" placeholder="/events/person.jpg" value={form.photo} onChange={(e) => setForm({ ...form, photo: e.target.value })} />
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Upload Photo {editing && '(leave empty to keep current)'}</label>
+                
+                {previewUrl ? (
+                  <div className="relative w-32 h-32 mb-3 rounded-2xl overflow-hidden border-2 border-orange-500/30 group">
+                    <img src={previewUrl} className="w-full h-full object-cover" />
+                    <button 
+                      type="button" 
+                      onClick={() => { setFile(null); setPreviewUrl(null); }}
+                      className="absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition shadow-lg"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ) : editing?.photo ? (
+                   <div className="relative w-32 h-32 mb-3 rounded-2xl overflow-hidden border border-gray-100">
+                    <img src={editing.photo} className="w-full h-full object-cover opacity-40 grayscale-[40%]" />
+                    <div className="absolute inset-0 flex items-center justify-center text-[8px] font-black uppercase tracking-widest text-gray-400 bg-gray-50/50">Current</div>
+                  </div>
+                ) : null}
+
+                <input 
+                  required={!editing}
+                  type="file" 
+                  accept="image/*"
+                  className="w-full border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-orange-500 text-sm file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" 
+                  onChange={handleFileChange} 
+                />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Bio</label>
@@ -175,8 +263,12 @@ export default function AdminHallOfFame() {
                 <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="w-4 h-4 accent-orange-500" />
                 <span className="text-sm font-medium text-gray-700">Show on website</span>
               </label>
-              <button type="submit" className="w-full bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition">
-                {editing ? 'Save Changes' : 'Add to Hall of Fame'}
+              <button 
+                disabled={submitting}
+                type="submit" 
+                className={`w-full font-bold py-3 rounded-lg transition ${submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600'}`}
+              >
+                {submitting ? 'Saving...' : (editing ? 'Save Changes' : 'Add to Hall of Fame')}
               </button>
             </form>
           </div>

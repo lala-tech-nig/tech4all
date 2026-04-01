@@ -80,13 +80,13 @@ export default function Footer() {
           <ul className="space-y-2 text-sm">
             {["Request Training", "Volunteer", "Donate", "About Us"].map((link, i) => (
               <li key={i}>
-                <a 
-                  href="#" 
-                  className="hover:text-orange-400 transition duration-200 flex items-center space-x-2"
+                <button 
+                  onClick={() => link === "Donate" ? setShowDonate(true) : null}
+                  className="hover:text-orange-400 transition duration-200 flex items-center space-x-2 w-full text-left"
                 >
                   <span className="h-1.5 w-1.5 bg-orange-500 rounded-full"></span>
                   <span>{link}</span>
-                </a>
+                </button>
               </li>
             ))}
           </ul>

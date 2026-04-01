@@ -4,8 +4,10 @@ import { API_BASE_URL } from "@/utils/api";
 import Image from "next/image";
 import { Typewriter } from "react-simple-typewriter";
 import ReusableModal from "./ReusableModal";
+import DonateModal from "./modals/DonateModal";
 import Confetti from "react-confetti";
 import toast from "react-hot-toast";
+import { Heart } from "lucide-react";
 
 export default function HeroCarousel() {
   const [slides, setSlides] = useState([]);
@@ -18,7 +20,6 @@ export default function HeroCarousel() {
       .then(res => res.json())
       .then(data => setSlides(data))
       .catch(() => {
-        // fallback to hardcoded if API unavailable
         setSlides([
           { src: "/hero1.jpg", title: "Tech4All by LALA TECH", subtitle: "Join the global mission to eradicate computer illiteracy." },
           { src: "/hero2.jpg", title: "Empower Your Community", subtitle: "Request free programs tailored to your people." },
@@ -54,29 +55,20 @@ export default function HeroCarousel() {
           body: JSON.stringify({ name, email: email || `${name.replace(/\s+/g,'').toLowerCase()}@request.com`, programName: persona || 'General Training', message: details }),
         });
       }
-    } catch { /* silent fail — toast confirms anyway */ }
+    } catch { /* silent fail */ }
 
     toast.success(
       `${type === "training" ? "Training request" : "Volunteer application"} by ${name} received! We'll reach out soon.`,
-      { duration: 10000 }
+      { duration: 10000, style: { background: '#111', color: '#fff', borderRadius: '12px' } }
     );
     setModal(null);
     setConfetti(true);
     setTimeout(() => setConfetti(false), 10000);
-    formEl.reset();
-  };
-
-  const handleDonate = (amount) => {
-    toast.success(`Redirecting to Flutterwave for ₦${amount} donation`, { duration: 10000 });
-    setModal(null);
-    setConfetti(true);
-    setTimeout(() => setConfetti(false), 10000);
-    window.location.href = "https://flutterwave.com/pay/demo"; // replace with real link
   };
 
   return (
     <section className="relative h-[90vh] w-full overflow-hidden">
-      {confetti && <Confetti />}
+      {confetti && <Confetti numberOfPieces={200} recycle={false} style={{ zIndex: 100 }} />}
 
       {slides.map((s, i) => (
         <div
@@ -88,7 +80,6 @@ export default function HeroCarousel() {
           <Image src={s.src} alt={s.title} fill className="object-cover" />
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
             <div className="max-w-3xl mx-auto text-center px-6 text-white">
-              {/* Title with typewriter */}
               <h2 className="text-4xl md:text-6xl font-extrabold drop-shadow-lg min-h-[4rem]">
                 {i === index && (
                   <Typewriter
@@ -96,14 +87,13 @@ export default function HeroCarousel() {
                     loop={false}
                     cursor
                     cursorStyle="|"
-                    typeSpeed={30}   // slower typing
-                    deleteSpeed={15} // slower delete
-                    delaySpeed={2500} // wait before switching
+                    typeSpeed={30}
+                    deleteSpeed={15}
+                    delaySpeed={2500}
                   />
                 )}
               </h2>
 
-              {/* Subtitle with typewriter */}
               <p className="mt-4 text-lg md:text-2xl drop-shadow min-h-[2.5rem]">
                 {i === index && (
                   <Typewriter
@@ -118,7 +108,6 @@ export default function HeroCarousel() {
                 )}
               </p>
 
-              {/* Buttons */}
               <div className="mt-8 flex flex-wrap justify-center gap-4">
                 <button
                   onClick={() => setModal("training")}
@@ -134,9 +123,11 @@ export default function HeroCarousel() {
                 </button>
                 <button
                   onClick={() => setModal("donate")}
-                  className="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-3 rounded-full font-semibold text-white shadow hover:scale-105 transition"
+                  className="group relative bg-white text-orange-600 px-8 py-3 rounded-full font-bold shadow-xl hover:scale-105 transition-all flex items-center gap-2 overflow-hidden"
                 >
-                  Donate
+                  <Heart size={18} className="group-hover:scale-125 transition-transform" />
+                  <span>Donate</span>
+                  <div className="absolute inset-x-0 bottom-0 h-1 bg-orange-600 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
                 </button>
               </div>
             </div>
@@ -144,7 +135,6 @@ export default function HeroCarousel() {
         </div>
       ))}
 
-      {/* Orange Carousel Indicators */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3">
         {slides.map((_, i) => (
           <button
@@ -157,7 +147,6 @@ export default function HeroCarousel() {
         ))}
       </div>
 
-      {/* Reusable Modals */}
       <ReusableModal
         isOpen={modal === "training"}
         onClose={() => setModal(null)}
@@ -166,7 +155,7 @@ export default function HeroCarousel() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            handleSubmit("training", e.target.name.value);
+            handleSubmit("training", e.target);
           }}
           className="space-y-4"
         >
@@ -192,7 +181,7 @@ export default function HeroCarousel() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            handleSubmit("volunteer", e.target.name.value);
+            handleSubmit("volunteer", e.target);
           }}
           className="space-y-4"
         >
@@ -205,24 +194,9 @@ export default function HeroCarousel() {
         </form>
       </ReusableModal>
 
-      <ReusableModal
-        isOpen={modal === "donate"}
-        onClose={() => setModal(null)}
-        title="Support Our Mission"
-      >
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleDonate(e.target.amount.value);
-          }}
-          className="space-y-4"
-        >
-          <input type="number" name="amount" placeholder="Enter amount (₦)" required className="w-full border p-3 rounded-lg" />
-          <button type="submit" className="bg-gradient-to-r from-orange-500 to-red-500 hover:opacity-90 w-full py-3 rounded-lg text-white font-semibold">
-            Donate via Flutterwave
-          </button>
-        </form>
-      </ReusableModal>
+      {modal === "donate" && (
+        <DonateModal onClose={() => setModal(null)} />
+      )}
     </section>
   );
 }

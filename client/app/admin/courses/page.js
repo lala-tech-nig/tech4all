@@ -18,6 +18,8 @@ export default function AdminCourses() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
+  const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -41,40 +43,73 @@ export default function AdminCourses() {
 
   useEffect(() => {
     fetchCourses();
-  }, []);
+    return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
+  }, [previewUrl]);
+
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(URL.createObjectURL(selectedFile));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     const url = editingCourse 
       ? `${API_BASE_URL}/courses/${editingCourse._id}` 
       : `${API_BASE_URL}/courses`;
     const method = editingCourse ? 'PUT' : 'POST';
 
+    const formData = new FormData();
+    if (file) formData.append('image', file);
+    formData.append('title', form.title);
+    formData.append('description', form.description);
+    formData.append('videoUrl', form.videoUrl);
+    formData.append('icon', form.icon);
+    formData.append('order', form.order);
+    formData.append('isActive', form.isActive);
+
     try {
       const response = await fetch(url, {
         method,
         headers: { 
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}` 
         },
-        body: JSON.stringify(form)
+        body: formData
       });
       
       if (response.ok) {
         toast.success(editingCourse ? 'Course updated' : 'Course created');
         setIsModalOpen(false);
         setEditingCourse(null);
+        setFile(null);
+        setPreviewUrl(null);
         setForm({ title: '', description: '', videoUrl: '', icon: '', isActive: true, order: 0 });
         fetchCourses();
+      } else if (response.status === 401) {
+        toast.error('Session expired. Please login again.');
+        localStorage.removeItem('adminToken');
+        window.location.href = '/admin/login';
+      } else {
+        toast.error('Save failed');
       }
     } catch (err) {
-      toast.error('Save failed');
+      toast.error('Server error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleEdit = (course) => {
     setEditingCourse(course);
     setForm(course);
+    setFile(null);
+    setPreviewUrl(null);
     setIsModalOpen(true);
   };
 
@@ -102,10 +137,12 @@ export default function AdminCourses() {
         <button 
           onClick={() => {
             setEditingCourse(null);
+            setFile(null);
+            setPreviewUrl(null);
             setForm({ title: '', description: '', videoUrl: '', icon: '', isActive: true, order: 0 });
             setIsModalOpen(true);
           }}
-          className="bg-orange-500 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2 hover:bg-orange-600 transition"
+          className="bg-orange-500 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2 hover:bg-orange-600 transition shadow-lg shadow-orange-500/20"
         >
           <Plus size={20} />
           <span>Add Program</span>
@@ -118,7 +155,12 @@ export default function AdminCourses() {
         ) : courses.map((course) => (
           <div key={course._id} className={`bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col ${!course.isActive ? 'opacity-60 grayscale' : ''}`}>
              <div className="h-40 bg-gray-900 relative group">
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                <img 
+                  src={course.imageUrl || `https://placehold.co/600x400/1a1a2e/orange?text=${course.title.split(' ')[0]}`} 
+                  className="w-full h-full object-cover opacity-60" 
+                  alt={course.title}
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition">
                   <Video className="text-white/50" size={48} />
                 </div>
                 <div className="absolute top-3 right-3 flex space-x-1 opacity-0 group-hover:opacity-100 transition">
@@ -217,8 +259,12 @@ export default function AdminCourses() {
               </div>
 
               <div className="pt-6">
-                <button type="submit" className="w-full bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition">
-                  {editingCourse ? 'Save Changes' : 'Publish Program'}
+                <button 
+                  disabled={submitting}
+                  type="submit" 
+                  className={`w-full font-bold py-3 rounded-lg transition ${submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600'}`}
+                >
+                  {submitting ? 'Processing...' : (editingCourse ? 'Save Changes' : 'Publish Program')}
                 </button>
               </div>
             </form>

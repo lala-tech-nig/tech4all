@@ -18,10 +18,11 @@ export default function AdminGallery() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({
-    url: '',
     caption: '',
     category: 'training'
   });
+  const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const fetchImages = async () => {
     try {
@@ -37,28 +38,59 @@ export default function AdminGallery() {
 
   useEffect(() => {
     fetchImages();
-  }, []);
+    return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
+  }, [previewUrl]);
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(URL.createObjectURL(selectedFile));
+    }
+  };
+
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!file) {
+      return toast.error('Please select an image file');
+    }
+
+    setSubmitting(true);
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('caption', form.caption);
+    formData.append('category', form.category);
+
     try {
       const response = await fetch(`${API_BASE_URL}/gallery`, {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}` 
         },
-        body: JSON.stringify(form)
+        body: formData
       });
       
       if (response.ok) {
         toast.success('Image added to gallery');
         setIsModalOpen(false);
-        setForm({ url: '', caption: '', category: 'training' });
+        setForm({ caption: '', category: 'training' });
+        setFile(null);
+        setPreviewUrl(null);
         fetchImages();
+      } else if (response.status === 401) {
+        toast.error('Session expired. Please login again.');
+        localStorage.removeItem('adminToken');
+        window.location.href = '/admin/login';
+      } else {
+        toast.error('Upload failed');
       }
     } catch (err) {
-      toast.error('Upload failed');
+      toast.error('Server error during upload');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -150,15 +182,29 @@ export default function AdminGallery() {
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Upload Image</label>
+                
+                {previewUrl && (
+                  <div className="relative w-full h-48 mb-3 rounded-xl overflow-hidden border-2 border-orange-500/30 group">
+                    <img src={previewUrl} className="w-full h-full object-cover" />
+                    <button 
+                      type="button" 
+                      onClick={() => { setFile(null); setPreviewUrl(null); }}
+                      className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition shadow-lg"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                )}
+
                 <div className="relative">
-                  <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                  <Upload className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                   <input 
                     required
-                    className="w-full border rounded-lg pl-10 pr-4 py-2 outline-none focus:ring-2 focus:ring-orange-500 transition text-sm"
-                    value={form.url}
-                    onChange={(e) => setForm({...form, url: e.target.value})}
-                    placeholder="https://images.unsplash.com/photo-..."
+                    type="file"
+                    accept="image/*"
+                    className="w-full border rounded-lg pl-10 pr-4 py-2 outline-none focus:ring-2 focus:ring-orange-500 transition text-sm file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                    onChange={handleFileChange}
                   />
                 </div>
               </div>
@@ -186,8 +232,12 @@ export default function AdminGallery() {
               </div>
 
               <div className="pt-6">
-                <button type="submit" className="w-full bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition shadow-lg shadow-orange-500/20 active:scale-[0.98]">
-                  Confirm & Upload
+                 <button 
+                  disabled={submitting}
+                  type="submit" 
+                  className={`w-full font-bold py-3 rounded-lg transition shadow-lg active:scale-[0.98] ${submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/20'}`}
+                >
+                  {submitting ? 'Uploading...' : 'Confirm & Upload'}
                 </button>
               </div>
             </form>

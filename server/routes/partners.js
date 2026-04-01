@@ -14,24 +14,35 @@ router.get('/', async (req, res) => {
   }
 });
 
+const { upload } = require('../utils/cloudinary');
+
 // POST create partner (Admin)
-router.post('/', auth, async (req, res) => {
+router.post('/', [auth, upload.single('logo')], async (req, res) => {
   try {
-    const partner = new Partner(req.body);
+    const partnerData = { ...req.body };
+    if (req.file) {
+      partnerData.logoUrl = req.file.path;
+    }
+    const partner = new Partner(partnerData);
     await partner.save();
     res.status(201).json(partner);
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error(err);
+    res.status(500).json({ message: 'Upload failed' });
   }
 });
 
 // PUT update partner (Admin)
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', [auth, upload.single('logo')], async (req, res) => {
   try {
-    const partner = await Partner.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const partnerData = { ...req.body };
+    if (req.file) {
+      partnerData.logoUrl = req.file.path;
+    }
+    const partner = await Partner.findByIdAndUpdate(req.params.id, partnerData, { new: true });
     res.json(partner);
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Update failed' });
   }
 });
 

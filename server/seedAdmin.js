@@ -34,7 +34,11 @@ const seedAdmin = async () => {
 
     process.exit(0);
   } catch (err) {
-    console.error('❌ Seeding failed:', err);
+    console.error('❌ Seeding failed!');
+    console.error('Error name:', err.name);
+    console.error('Error message:', err.message);
+    if (err.stack) console.error('Stack trace:', err.stack);
+    if (err.errors) console.error('Validation errors:', JSON.stringify(err.errors, null, 2));
     process.exit(1);
   }
 };

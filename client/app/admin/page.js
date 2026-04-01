@@ -7,23 +7,50 @@ import {
   CreditCard,
   ArrowUpRight,
   TrendingUp,
-  Clock
+  Clock,
+  Image as ImageIcon
 } from 'lucide-react';
 
-const STATS = [
-  { name: 'Total Contacts', value: '45', icon: MessageSquare, change: '+12%', color: 'from-blue-500 to-blue-600' },
-  { name: 'Course Requests', value: '128', icon: GraduationCap, change: '+18.5%', color: 'from-orange-500 to-orange-600' },
-  { name: 'Active Programs', value: '6', icon: Users, change: '0%', color: 'from-purple-500 to-purple-600' },
-  { name: 'Total Donations', value: '₦1.2M', icon: CreditCard, change: '+24%', color: 'from-emerald-500 to-emerald-600' },
-];
+import { API_BASE_URL } from '@/utils/api';
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState(STATS);
+  const [stats, setStats] = useState([]);
+  const [recentData, setRecentData] = useState({ contacts: [], requests: [] });
   const [loading, setLoading] = useState(true);
 
-  // In a real app, you would fetch these from `${API_BASE_URL}/donations/stats` etc.
+  const fetchData = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const headers = { 'Authorization': `Bearer ${token}` };
+      
+      const statsRes = await fetch(`${API_BASE_URL}/dashboard/stats`, { headers });
+      const statsJson = await statsRes.json();
+      
+      const recentRes = await fetch(`${API_BASE_URL}/dashboard/recent`, { headers });
+      const recentJson = await recentRes.json();
+
+      if (statsJson.totalContacts !== undefined) {
+        const formattedStats = [
+          { name: 'Total Contacts', value: statsJson.totalContacts, icon: MessageSquare, change: '+12%', color: 'from-blue-500 to-blue-600' },
+          { name: 'Course Requests', value: statsJson.courseRequests, icon: GraduationCap, change: '+18.5%', color: 'from-orange-500 to-orange-600' },
+          { name: 'Active Programs', value: statsJson.activePrograms, icon: Users, change: '0%', color: 'from-purple-500 to-purple-600' },
+          { name: 'Total Donations', value: statsJson.totalDonations, icon: CreditCard, change: '+24%', color: 'from-emerald-500 to-emerald-600' },
+        ];
+        setStats(formattedStats);
+      }
+      
+      if (recentJson.contacts && recentJson.requests) {
+        setRecentData(recentJson);
+      }
+    } catch (err) {
+      console.error('Failed to fetch dashboard data', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setTimeout(() => setLoading(false), 800);
+    fetchData();
   }, []);
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -73,15 +100,17 @@ export default function AdminDashboard() {
           </div>
           
           <div className="space-y-4">
-            {[1, 2, 3, 4].map((i) => (
+            {(recentData?.contacts || []).concat(recentData?.requests || []).slice(0, 5).map((item, i) => (
               <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-gray-50 hover:bg-gray-50 transition group">
                 <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">
-                    JD
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${item.subject ? 'bg-blue-50 text-blue-600' : 'bg-orange-50 text-orange-600'}`}>
+                    {item.name.charAt(0)}
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">John Doe</h4>
-                    <p className="text-xs text-gray-500">Requested "Phone & Laptop Repair" • 2h ago</p>
+                    <h4 className="font-semibold text-gray-900">{item.name}</h4>
+                    <p className="text-xs text-gray-500">
+                      {item.subject ? `Messaged: "${item.subject}"` : `Requested: ${item.courseId?.title || 'Course'}`} • {new Date(item.createdAt).toLocaleDateString()}
+                    </p>
                   </div>
                 </div>
                 <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition">
@@ -90,6 +119,9 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ))}
+            {recentData.contacts.length === 0 && recentData.requests.length === 0 && (
+              <p className="text-center py-10 text-gray-400 italic">No recent activity found.</p>
+            )}
           </div>
         </div>
 

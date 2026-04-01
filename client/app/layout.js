@@ -1,8 +1,5 @@
-
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-
+import LayoutWrapper from "@/components/LayoutWrapper";
 
 export const metadata = {
   title: 'Tech4All — Free Tech Training',
@@ -12,10 +9,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50 text-gray-900">
-        <Navbar />
-        <main className="pt-20">{children}</main>
-        <Footer />
+      <body className="bg-white text-gray-900">
+        <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>
   );
