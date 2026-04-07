@@ -66,13 +66,14 @@ export default function AdminCourses() {
     const method = editingCourse ? 'PUT' : 'POST';
 
     const formData = new FormData();
-    if (file) formData.append('image', file);
+    if (file) formData.append('video', file);
     formData.append('title', form.title);
     formData.append('description', form.description);
-    formData.append('videoUrl', form.videoUrl);
+    formData.append('videoUrl', form.videoUrl || '');
     formData.append('icon', form.icon);
     formData.append('order', form.order);
     formData.append('isActive', form.isActive);
+
 
     try {
       const response = await fetch(url, {
@@ -154,12 +155,20 @@ export default function AdminCourses() {
           <p className="col-span-full py-10 text-center text-gray-500">Loading courses...</p>
         ) : courses.map((course) => (
           <div key={course._id} className={`bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col ${!course.isActive ? 'opacity-60 grayscale' : ''}`}>
-             <div className="h-40 bg-gray-900 relative group">
-                <img 
-                  src={course.imageUrl || `https://placehold.co/600x400/1a1a2e/orange?text=${course.title.split(' ')[0]}`} 
-                  className="w-full h-full object-cover opacity-60" 
-                  alt={course.title}
-                />
+              <div className="h-40 bg-gray-900 relative group">
+                {course.videoUrl ? (
+                  <video 
+                    src={course.videoUrl} 
+                    className="w-full h-full object-cover opacity-60" 
+                    muted 
+                    playsInline
+                  />
+                ) : (
+                  <div className="w-full h-full bg-orange-500/10 flex items-center justify-center">
+                    <Video className="text-orange-500/30" size={48} />
+                  </div>
+                )}
+
                 <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition">
                   <Video className="text-white/50" size={48} />
                 </div>
@@ -209,33 +218,34 @@ export default function AdminCourses() {
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Upload Course Image</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Upload Course Video (.mp4)</label>
                 
                 {previewUrl ? (
-                  <div className="relative w-full h-40 mb-3 rounded-xl overflow-hidden border border-orange-500/30 group bg-gray-50">
-                    <img src={previewUrl} className="w-full h-full object-cover" />
+                  <div className="relative w-full mb-3 rounded-xl overflow-hidden border border-orange-500/30 group bg-gray-900">
+                    <video src={previewUrl} className="w-full max-h-48 object-cover" controls />
                     <button 
                       type="button" 
                       onClick={() => { setFile(null); setPreviewUrl(null); }}
-                      className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition shadow-lg"
+                      className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition shadow-lg z-10"
                     >
                       <X size={12} />
                     </button>
                   </div>
-                ) : editingCourse?.imageUrl ? (
-                  <div className="relative w-full h-40 mb-3 rounded-xl overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center opacity-70 group">
-                    <img src={editingCourse.imageUrl} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition">Current Image</div>
+                ) : editingCourse?.videoUrl ? (
+                  <div className="relative w-full mb-3 rounded-xl overflow-hidden border border-gray-100 bg-gray-900 flex flex-col items-center justify-center group">
+                    <video src={editingCourse.videoUrl} className="w-full max-h-48 object-cover opacity-60" controls />
+                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center bg-black/40 text-white text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition">Current Video</div>
                   </div>
                 ) : null}
 
                 <input 
                   type="file" 
-                  accept="image/*"
+                  accept="video/*"
                   className="w-full border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-orange-500 transition text-sm file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
                   onChange={handleFileChange}
                 />
               </div>
+
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>

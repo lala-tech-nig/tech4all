@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import ModalWrapper from './ModalWrapper';
 import { API_BASE_URL } from '@/utils/api';
-import { Send, User, MessageCircle, Mail, Phone, Briefcase, X } from 'lucide-react';
+import { Send, User, MessageCircle, Mail, Phone, Briefcase, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function TrainingModal({ onClose, onSubmit }) {
@@ -11,7 +11,9 @@ export default function TrainingModal({ onClose, onSubmit }) {
     name: '',
     email: '',
     phone: '',
-    persona: '',
+    participantCount: '',
+    demographic: '',
+    preferredDate: '',
     message: ''
   });
 
@@ -24,10 +26,13 @@ export default function TrainingModal({ onClose, onSubmit }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
-          programName: 'General Training inquiry'
+          programName: 'General Training inquiry',
+          message: `${form.message}\n\n[Details: ${form.participantCount} participants, Target: ${form.demographic}, Preferred Date: ${form.preferredDate}]`
         }),
       });
+
       if (res.ok) {
+        window.dispatchEvent(new CustomEvent('show-confetti'));
         onSubmit(form.name); 
       } else {
         toast.error('Failed to submit request.');
@@ -86,19 +91,42 @@ export default function TrainingModal({ onClose, onSubmit }) {
             />
           </div>
           <div className="relative group">
+            <Users className="absolute left-4 top-4 text-gray-400 group-focus-within:text-orange-500 transition" size={18} />
+            <input
+              required
+              type="number"
+              className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-11 pr-4 py-4 outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition text-sm font-medium"
+              placeholder="Participants Count"
+              value={form.participantCount}
+              onChange={e => setForm({ ...form, participantCount: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="relative group">
             <Briefcase className="absolute left-4 top-4 text-gray-400 group-focus-within:text-orange-500 transition" size={18} />
             <select
               required
               className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-11 pr-4 py-4 outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition text-sm font-medium appearance-none"
-              value={form.persona}
-              onChange={e => setForm({ ...form, persona: e.target.value })}
+              value={form.demographic}
+              onChange={e => setForm({ ...form, demographic: e.target.value })}
             >
-              <option value="">I am a...</option>
-              <option value="Individual">Individual</option>
-              <option value="Organization">Organization</option>
-              <option value="Community">Community Leader</option>
-              <option value="School">School/Institution</option>
+              <option value="">Target Demographic...</option>
+              <option value="Youths">Youths (15–30)</option>
+              <option value="Children">Children (Below 15)</option>
+              <option value="Adults">Adults (30+)</option>
+              <option value="Corporate">Corporate / Professionals</option>
             </select>
+          </div>
+          <div className="relative group">
+            <input
+              required
+              type="date"
+              className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition text-sm font-medium"
+              value={form.preferredDate}
+              onChange={e => setForm({ ...form, preferredDate: e.target.value })}
+            />
           </div>
         </div>
 
@@ -107,7 +135,7 @@ export default function TrainingModal({ onClose, onSubmit }) {
            <textarea
              rows="3"
              className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-11 pr-4 py-4 outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition text-sm font-medium"
-             placeholder="Tell us what you need..."
+             placeholder="Additional details or specific needs..."
              value={form.message}
              onChange={e => setForm({ ...form, message: e.target.value })}
            />
@@ -131,4 +159,3 @@ export default function TrainingModal({ onClose, onSubmit }) {
     </ModalWrapper>
   );
 }
-

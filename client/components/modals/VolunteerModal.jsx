@@ -10,7 +10,10 @@ export default function VolunteerModal({ onClose, onSubmit }) {
   const [form, setForm] = useState({
     name: '',
     email: '',
-    skills: ''
+    phone: '',
+    role: '',
+    availability: '',
+    reason: ''
   });
 
   const handleSubmit = async (e) => {
@@ -20,9 +23,13 @@ export default function VolunteerModal({ onClose, onSubmit }) {
       const res = await fetch(`${API_BASE_URL}/volunteers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          skills: `Role: ${form.role}, Availability: ${form.availability}, Reason: ${form.reason}`
+        }),
       });
       if (res.ok) {
+        window.dispatchEvent(new CustomEvent('show-confetti'));
         onSubmit(form.name);
       } else {
         toast.error('Submission failed.');
@@ -44,39 +51,91 @@ export default function VolunteerModal({ onClose, onSubmit }) {
         <p className="text-gray-500 mt-2 font-medium italic">"The best way to find yourself is to lose yourself in the service of others."</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="relative group">
-          <User className="absolute left-4 top-4 text-gray-400 group-focus-within:text-orange-500 transition" size={18} />
-          <input
-            required
-            className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-11 pr-4 py-4 outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition text-sm font-medium"
-            placeholder="Full Name"
-            value={form.name}
-            onChange={e => setForm({ ...form, name: e.target.value })}
-          />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="relative group">
+            <User className="absolute left-4 top-4 text-gray-400 group-focus-within:text-orange-500 transition" size={18} />
+            <input
+              required
+              className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-11 pr-4 py-4 outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition text-sm font-medium"
+              placeholder="Full Name"
+              value={form.name}
+              onChange={e => setForm({ ...form, name: e.target.value })}
+            />
+          </div>
+          <div className="relative group">
+            <Mail className="absolute left-4 top-4 text-gray-400 group-focus-within:text-orange-500 transition" size={18} />
+            <input
+              required
+              type="email"
+              className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-11 pr-4 py-4 outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition text-sm font-medium"
+              placeholder="Email Address"
+              value={form.email}
+              onChange={e => setForm({ ...form, email: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="relative group">
+            <Phone className="absolute left-4 top-4 text-gray-400 group-focus-within:text-orange-500 transition" size={18} />
+            <input
+              required
+              className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-11 pr-4 py-4 outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition text-sm font-medium"
+              placeholder="Phone Number"
+              value={form.phone}
+              onChange={e => setForm({ ...form, phone: e.target.value })}
+            />
+          </div>
+          <div className="relative group">
+            <Sparkles className="absolute left-4 top-4 text-gray-400 group-focus-within:text-orange-500 transition" size={18} />
+            <select
+              required
+              className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-11 pr-4 py-4 outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition text-sm font-medium appearance-none"
+              value={form.role}
+              onChange={e => setForm({ ...form, role: e.target.value })}
+            >
+              <option value="">Select Role...</option>
+              <option value="Facilitator">Training Facilitator</option>
+              <option value="Media">Media & Content</option>
+              <option value="Support">Field Support</option>
+              <option value="Admin">Administrative</option>
+            </select>
+          </div>
         </div>
 
         <div className="relative group">
-          <Mail className="absolute left-4 top-4 text-gray-400 group-focus-within:text-orange-500 transition" size={18} />
-          <input
-            required
-            type="email"
-            className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-11 pr-4 py-4 outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition text-sm font-medium"
-            placeholder="Email Address"
-            value={form.email}
-            onChange={e => setForm({ ...form, email: e.target.value })}
-          />
+          <div className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3">
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Availability</label>
+            <div className="flex gap-4">
+              {['Weekdays', 'Weekends', 'Evening'].map((time) => (
+                <label key={time} className="flex items-center gap-2 cursor-pointer group">
+                  <input 
+                    type="checkbox" 
+                    className="accent-orange-500 w-4 h-4" 
+                    onChange={(e) => {
+                      const val = e.target.checked 
+                        ? (form.availability ? `${form.availability}, ${time}` : time)
+                        : form.availability.replace(time, '').replace(', ,', ',').trim();
+                      setForm({...form, availability: val});
+                    }}
+                  />
+                  <span className="text-xs font-bold text-gray-600 group-hover:text-orange-600 transition">{time}</span>
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="relative group">
-          <Sparkles className="absolute left-4 top-4 text-gray-400 group-focus-within:text-orange-500 transition" size={18} />
+          <Heart className="absolute left-4 top-4 text-gray-400 group-focus-within:text-orange-500 transition" size={18} />
           <textarea
             rows="3"
             required
             className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-11 pr-4 py-4 outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition text-sm font-medium"
-            placeholder="What skills can you share? (e.g. Graphic Design, Coding, Outreach)"
-            value={form.skills}
-            onChange={e => setForm({ ...form, skills: e.target.value })}
+            placeholder="Why do you want to join Tech4All?"
+            value={form.reason}
+            onChange={e => setForm({ ...form, reason: e.target.value })}
           />
         </div>
 
@@ -95,6 +154,7 @@ export default function VolunteerModal({ onClose, onSubmit }) {
           )}
         </button>
       </form>
+
     </ModalWrapper>
   );
 }

@@ -13,7 +13,9 @@ export default function DonateModal({ onClose, onComplete }) {
   const handleComplete = () => {
     setIsFinishing(true);
     toast.success("Thank you for your generosity!");
+    window.dispatchEvent(new CustomEvent('show-confetti'));
     setTimeout(() => {
+
       onComplete();
     }, 800);
   };

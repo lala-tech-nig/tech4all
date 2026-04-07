@@ -12,9 +12,10 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'tech4all',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+    resource_type: 'auto',
   },
 });
+
 
 const upload = multer({ storage: storage });
 

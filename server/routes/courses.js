@@ -9,7 +9,7 @@ const { upload } = require('../utils/cloudinary');
 /* line 18 approx */
 // @route   POST /api/courses
 // @desc    Create a new course (Admin)
-router.post('/', [auth, upload.single('image')], async (req, res) => {
+router.post('/', [auth, upload.single('video')], async (req, res) => {
   try {
     const { title, description, videoUrl, icon, order, isActive } = req.body;
     const courseData = {
@@ -22,8 +22,10 @@ router.post('/', [auth, upload.single('image')], async (req, res) => {
     };
 
     if (req.file) {
-      courseData.imageUrl = req.file.path;
+      courseData.videoUrl = req.file.path;
     }
+
+
 
     const newCourse = new Course(courseData);
     await newCourse.save();
@@ -36,13 +38,14 @@ router.post('/', [auth, upload.single('image')], async (req, res) => {
 
 // @route   PUT /api/courses/:id
 // @desc    Update a course (Admin)
-router.put('/:id', [auth, upload.single('image')], async (req, res) => {
+router.put('/:id', [auth, upload.single('video')], async (req, res) => {
   try {
     const updateData = { ...req.body };
     
     if (req.file) {
-      updateData.imageUrl = req.file.path;
+      updateData.videoUrl = req.file.path;
     }
+
 
     if (updateData.order) updateData.order = parseInt(updateData.order);
     if (updateData.isActive !== undefined) updateData.isActive = updateData.isActive === 'true';

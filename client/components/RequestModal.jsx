@@ -30,10 +30,10 @@ export default function RequestModal({ programName, onClose }) {
 
       if (response.ok) {
         toast.success(`Success! Request for ${programName} sent.`);
-        // Note: Confetti triggered by setting a global state or mounting it here.
-        // We will mount it in the parent if possible or just use the global Layout confetti (to be added)
+        window.dispatchEvent(new CustomEvent('show-confetti'));
         onClose();
       } else {
+
         toast.error('Failed to submit enrollment request.');
       }
     } catch (err) {

@@ -10,62 +10,50 @@ import DonateModal from "./modals/DonateModal";
 import toast from "react-hot-toast";
 
 
+import { usePathname } from "next/navigation";
+
 const navLinks = [
-  { id: "home", label: "Home", icon: <Box size={16} /> },
-  { id: "programs", label: "Programs", icon: <Box size={16} /> },
-  { id: "hall", label: "Hall of Fame", icon: <Users size={16} /> },
-  { id: "gallery", label: "Gallery", icon: <ChevronRight size={16} /> },
-  { id: "partners", label: "Partners", icon: <ChevronRight size={16} /> },
-  { id: "contact", label: "Contact", icon: <MessageSquare size={16} /> },
+  { path: "/", label: "Home", id: "home" },
+  { path: "/about", label: "About", id: "about" },
+  { path: "/programs", label: "Programs", id: "programs" },
+  { path: "/hall-of-fame", label: "Hall of Fame", id: "hall" },
+  { path: "/gallery", label: "Gallery", id: "gallery" },
+  { path: "/partners", label: "Partners", id: "partners" },
+  { path: "/contact", label: "Contact", id: "contact" },
 ];
 
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [active, setActive] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [modal, setModal] = useState(null);
 
-
-
-  // Handle scroll effects
+  // Handle scroll effects & active path
   useEffect(() => {
+    setActive(pathname);
+    
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
-      
-      // Scroll-spy logic
-      const scrollY = window.scrollY + 100;
-      let currentSection = "";
-      navLinks.forEach((link) => {
-        const element = document.getElementById(link.id);
-        if (element && scrollY >= element.offsetTop && scrollY < element.offsetTop + element.offsetHeight) {
-           currentSection = link.id;
-        }
-      });
-      setActive(currentSection);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [pathname]);
 
   const handleSubmit = (type, name) => {
-    // Modal already showed a specific toast, but we can add a generic one or just trigger confetti
     window.dispatchEvent(new CustomEvent('show-confetti'));
     setModal(null);
   };
-
 
   const handleDonateSuccess = () => {
     window.dispatchEvent(new CustomEvent('show-confetti'));
     setModal(null);
   };
 
-
   return (
     <>
-
-      
       <header 
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           isScrolled 
@@ -95,15 +83,15 @@ export default function Navbar() {
           {/* Desktop Nav Links */}
           <div className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => (
-              <a
-                key={link.id}
-                href={`#${link.id}`}
+              <Link
+                key={link.path}
+                href={link.path}
                 className={`relative px-4 py-2 text-sm font-bold tracking-tight transition-all duration-300 rounded-lg group ${
-                  active === link.id ? "text-orange-600" : "text-gray-600 hover:text-gray-950 hover:bg-gray-50"
+                  active === link.path ? "text-orange-600" : "text-gray-600 hover:text-gray-950 hover:bg-gray-50"
                 }`}
               >
                 <span className="relative z-10">{link.label}</span>
-                {active === link.id && (
+                {active === link.path && (
                   <motion.div 
                     layoutId="activeNav"
                     className="absolute inset-0 bg-orange-50 rounded-lg border border-orange-100"
@@ -111,9 +99,10 @@ export default function Navbar() {
                   />
                 )}
                 <span className="absolute bottom-1 left-4 right-4 h-0.5 bg-orange-500 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
-              </a>
+              </Link>
             ))}
           </div>
+
 
           {/* Action Buttons */}
           <div className="hidden md:flex items-center gap-3">
@@ -159,16 +148,17 @@ export default function Navbar() {
             >
               <div className="p-6 flex flex-col gap-2">
                 {navLinks.map((link) => (
-                  <a
-                    key={link.id}
-                    href={`#${link.id}`}
+                  <Link
+                    key={link.path}
+                    href={link.path}
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center justify-between px-4 py-4 rounded-2xl hover:bg-orange-50 transition group"
                   >
-                    <span className="font-bold text-gray-800 group-hover:text-orange-600 transition">{link.label}</span>
-                    <ChevronRight size={18} className="text-gray-300 group-hover:text-orange-500 transition px-0" />
-                  </a>
+                    <span className={`font-bold transition ${active === link.path ? "text-orange-600" : "text-gray-800 group-hover:text-orange-600"}`}>{link.label}</span>
+                    <ChevronRight size={18} className={`transition px-0 ${active === link.path ? "text-orange-500" : "text-gray-300 group-hover:text-orange-500"}`} />
+                  </Link>
                 ))}
+
                 <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-3">
                   <button
                     onClick={() => { setModal("volunteer"); setMobileMenuOpen(false); }}

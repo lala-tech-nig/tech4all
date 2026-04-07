@@ -6,230 +6,170 @@ import Lottie from "lottie-react";
 import wavingHand from "../public/lotties/hand-wave.json";
 import confetti from "../public/lotties/Confetti.json";
 import stars from "../public/lotties/stars.json";
-import ReusableModal from "./ReusableModal";
-import toast from "react-hot-toast";
-import Confetti from "react-confetti";
+import VolunteerModal from "./modals/VolunteerModal";
 
 export default function VolunteerCTA() {
   const [showRoles, setShowRoles] = useState(false);
   const [modal, setModal] = useState(null);
-  const [confettiActive, setConfettiActive] = useState(false);
   const [roles, setRoles] = useState([]);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/settings`)
       .then(res => res.json())
-      .then(data => setRoles(data.volunteerRoles))
+      .then(data => {
+        if(data.volunteerRoles) setRoles(data.volunteerRoles);
+      })
       .catch(err => {
          // Fallback
          setRoles([
-           { title: 'Facilitators', desc: 'Lead training sessions.' },
-           { title: 'Field Support', desc: 'Ensure logsitics run smoothly.' }
+           { title: 'Facilitators', desc: 'Lead training sessions in various tech stacks.' },
+           { title: 'Field Support', desc: 'Ensure logistics and ground operations run smoothly.' },
+           { title: 'Media & Outreach', desc: 'Manage social media and community engagement.' }
          ]);
       });
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const name = e.target.name.value;
-    const email = e.target.email.value;
-    const skills = e.target.skills?.value || '';
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/volunteers`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, skills }),
-      });
-
-      if (res.ok) {
-        toast.success(`Volunteer application by ${name} received. 🎉`, { duration: 10000 });
-        setModal(null);
-        setConfettiActive(true);
-        setTimeout(() => setConfettiActive(false), 10000);
-        e.target.reset();
-      } else {
-        toast.error('Submission failed. Please try again.');
-      }
-    } catch {
-      toast.error('Could not connect to server. Please try later.');
-    }
-  };
-
   return (
-    <section id="volunteer" className="relative py-20 overflow-hidden">
-      {confettiActive && <Confetti />}
-      {/* Background Confetti Animation */}
-      <div className="absolute inset-0 pointer-events-none opacity-40">
-        <Lottie animationData={confetti} loop autoplay />
-      </div>
+    <section id="volunteer" className="relative py-24 overflow-hidden bg-white">
+      {/* Background Subtle Gradient */}
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-orange-50/50 to-transparent -z-10" />
 
-      <div className="relative max-w-7xl mx-auto px-6 md:px-20 flex flex-col md:flex-row items-center justify-between gap-10">
+      <div className="relative max-w-7xl mx-auto px-6 md:px-20 flex flex-col md:flex-row items-center justify-between gap-16">
         {/* Text Content */}
         <motion.div
-          initial={{ opacity: 0, x: -80 }}
+          initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="max-w-xl relative z-10"
+          className="max-w-2xl relative z-10"
         >
-          <div className="flex items-center gap-3">
-            <h3 className="text-4xl font-extrabold text-gray-900 leading-snug">
-              🚀 Step Up, Shine Bright —{" "}
-              <span className="text-orange-600">Volunteer with Tech4All!</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 text-orange-700 rounded-full text-xs font-black uppercase tracking-widest mb-6">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+            </span>
+            Impact Driven
+          </div>
+
+          <div className="flex items-center gap-4 mb-6">
+            <h3 className="text-4xl md:text-5xl font-black text-gray-900 leading-[1.1]">
+              Shape the Future, <br />
+              <span className="text-orange-600">Be a Volunteer!</span>
             </h3>
-            <div className="w-12 h-12">
+            <div className="w-16 h-16 hidden md:block">
               <Lottie animationData={wavingHand} loop autoplay />
             </div>
           </div>
 
-          <p className="mt-4 text-lg text-gray-700">
-            Share your skills to empower youths, transform communities, and
-            leave a legacy. When you volunteer, you don’t just give back — you
-            also{" "}
-            <span className="font-semibold text-orange-600">
-              grow, connect, and get recognized.
-            </span>
+          <p className="text-xl text-gray-600 leading-relaxed mb-8">
+            Join a community of changemakers. At Tech4All, we don’t just train people — we build legacies. Your expertise can be the bridge to someone's dream career.
           </p>
 
-          {/* Benefits */}
-          <ul className="mt-6 space-y-3 text-gray-700">
-            <motion.li
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="flex items-center gap-3"
-            >
-              <span className="w-6 h-6">
-                <Lottie animationData={stars} loop autoplay />
-              </span>
-              Public recognition as a valued Tech4All contributor
-            </motion.li>
-            <motion.li
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              className="flex items-center gap-3"
-            >
-              🌍 Job recommendations & network opportunities
-            </motion.li>
-            <motion.li
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6, duration: 0.6 }}
-              className="flex items-center gap-3"
-            >
-              ⭐ Star ranking to showcase on your resume
-            </motion.li>
-          </ul>
+          {/* Benefits Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+            {[
+              { icon: <Lottie animationData={stars} className="w-6 h-6" />, text: "Global Recognition" },
+              { icon: "🌍", text: "Career Networking" },
+              { icon: "🎓", text: "Skill Certification" },
+              { icon: "⭐", text: "Mentorship Growth" },
+            ].map((item, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * i }}
+                className="flex items-center gap-3 text-gray-700 font-bold"
+              >
+                <span className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center shadow-sm border border-gray-100">{item.icon}</span>
+                <span className="text-sm">{item.text}</span>
+              </motion.div>
+            ))}
+          </div>
 
           {/* CTA Buttons */}
-          <div className="mt-8 flex flex-wrap gap-4">
-            <motion.button
+          <div className="flex flex-wrap gap-4">
+            <button
               onClick={() => setModal("volunteer")}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg shadow-lg hover:bg-orange-700 transition"
+              className="px-8 py-4 bg-gray-900 text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-2xl hover:bg-orange-600 transition-all transform hover:-translate-y-1 active:scale-95"
             >
-              Become a Volunteer
-            </motion.button>
-            <motion.button
+              Start Your Journey
+            </button>
+            <button
               onClick={() => setShowRoles(true)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-6 py-3 border-2 border-orange-600 text-orange-600 font-semibold rounded-lg hover:bg-orange-50 transition"
+              className="px-8 py-4 border-2 border-gray-200 text-gray-900 font-black uppercase tracking-widest text-xs rounded-2xl hover:border-orange-500 hover:text-orange-600 transition-all transform hover:-translate-y-1"
             >
               Explore Roles
-            </motion.button>
+            </button>
           </div>
         </motion.div>
 
         {/* Illustration Side */}
         <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="w-full md:w-1/2 flex justify-center relative z-10"
+          className="w-full md:w-1/2 relative"
         >
+          <div className="absolute inset-0 bg-orange-500/10 blur-[120px] rounded-full" />
           <img
             src="/volunteer/volunteer-illustration.jpg"
             alt="Volunteer illustration"
-            className="w-80 md:w-[450px] animate-bounce-slow"
+            className="w-full relative z-10 transform hover:scale-105 transition-transform duration-700 pointer-events-none"
           />
         </motion.div>
       </div>
 
-      {/* Roles Modal */}
+      {/* Roles Modal Overlay */}
       {showRoles && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-6">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white rounded-xl shadow-2xl p-8 max-w-3xl w-full overflow-y-auto max-h-[90vh]"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-[2rem] shadow-2xl p-10 max-w-3xl w-full border border-white/20 relative"
           >
-            <h2 className="text-2xl font-bold text-orange-600 mb-6">
-              🌟 Volunteer Roles at Tech4All
+            <button onClick={() => setShowRoles(false)} className="absolute top-8 right-8 text-gray-400 hover:text-orange-500 transition">
+              <span className="text-2xl font-black">✕</span>
+            </button>
+            
+            <h2 className="text-4xl font-black text-gray-900 mb-8 tracking-tight">
+              🌟 Available <span className="text-orange-600">Roles</span>
             </h2>
-            <div className="space-y-6">
+            
+            <div className="space-y-8 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar">
               {roles.map((role, idx) => (
-                <div key={idx}>
-                  <h3 className="text-xl font-semibold text-gray-900">
+                <div key={idx} className="group">
+                  <h3 className="text-xl font-black text-gray-900 group-hover:text-orange-600 transition flex items-center gap-3">
+                    <span className="w-1.5 h-6 bg-orange-500 rounded-full" />
                     {role.title}
                   </h3>
-                  <p className="mt-2 text-gray-700 leading-relaxed">
+                  <p className="mt-3 text-gray-600 font-medium leading-relaxed border-l-2 border-gray-100 pl-4 ml-0.5">
                     {role.desc}
                   </p>
                 </div>
               ))}
             </div>
-            <div className="mt-8 flex justify-end">
-              <button
-                onClick={() => setShowRoles(false)}
-                className="px-5 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition"
-              >
-                Close
-              </button>
-            </div>
+            
+            <button
+              onClick={() => { setShowRoles(false); setModal("volunteer"); }}
+              className="mt-10 w-full py-5 bg-orange-600 text-white font-black uppercase tracking-[3px] text-[10px] rounded-2xl hover:bg-orange-700 transition shadow-xl shadow-orange-500/20"
+            >
+              Choose a Role & Apply
+            </button>
           </motion.div>
         </div>
       )}
 
-      {/* Volunteer Form Modal (same as HeroCarousel) */}
-      <ReusableModal
-        isOpen={modal === "volunteer"}
-        onClose={() => setModal(null)}
-        title="Volunteer With Us"
-      >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="name"
-            placeholder="Your Full Name"
-            required
-            className="w-full border p-3 rounded-lg"
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Your Email"
-            required
-            className="w-full border p-3 rounded-lg"
-          />
-          <textarea
-            name="skills"
-            placeholder="What skills can you teach or support with?"
-            className="w-full border p-3 rounded-lg"
-          ></textarea>
-          <button
-            type="submit"
-            className="bg-orange-500 hover:bg-orange-600 w-full py-3 rounded-lg text-white font-semibold"
-          >
-            Submit
-          </button>
-        </form>
-      </ReusableModal>
+      {/* Premium Volunteer Modal */}
+      {modal === "volunteer" && (
+        <VolunteerModal 
+          onClose={() => setModal(null)} 
+          onSubmit={(name) => {
+             setModal(null);
+             // Confetti triggered in VolunteerModal.jsx
+          }} 
+        />
+      )}
     </section>
   );
 }
