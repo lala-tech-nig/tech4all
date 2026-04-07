@@ -31,7 +31,11 @@ export default function AdminCourses() {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/courses?admin=true`);
+      const response = await fetch(`${API_BASE_URL}/courses?admin=true`, {
+        headers: { 
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}` 
+        }
+      });
       const data = await response.json();
       setCourses(data);
     } catch (err) {
@@ -43,8 +47,12 @@ export default function AdminCourses() {
 
   useEffect(() => {
     fetchCourses();
+  }, []);
+
+  useEffect(() => {
     return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
   }, [previewUrl]);
+
 
   const [submitting, setSubmitting] = useState(false);
 

@@ -5,8 +5,29 @@ const auth = require('../middleware/auth');
 const { upload } = require('../utils/cloudinary');
 
 // @route   GET /api/courses
-// ...
-/* line 18 approx */
+// @desc    Get all courses (Active only for public, all for admin)
+router.get('/', async (req, res) => {
+  try {
+    const isAdmin = req.query.admin === 'true';
+    
+    // If admin query is present, optionally verify auth
+    if (isAdmin) {
+      // We can use a soft-auth here or just require the 'auth' middleware
+      // actually let's use the 'auth' middleware for admin=true for security
+      return auth(req, res, async () => {
+        const courses = await Course.find({}).sort({ order: 1 });
+        res.json(courses);
+      });
+    }
+
+    const courses = await Course.find({ isActive: true }).sort({ order: 1 });
+    res.json(courses);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // @route   POST /api/courses
 // @desc    Create a new course (Admin)
 router.post('/', [auth, upload.single('video')], async (req, res) => {
