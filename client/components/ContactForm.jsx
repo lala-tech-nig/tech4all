@@ -1,10 +1,16 @@
 'use client';
 import { useState } from 'react';
 import { API_BASE_URL } from '@/utils/api';
+import toast from 'react-hot-toast';
 
 export default function ContactForm() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -122,4 +128,3 @@ export default function ContactForm() {
     </section>
   );
 }
-

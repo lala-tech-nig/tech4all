@@ -164,7 +164,7 @@ export default function HeroCarousel() {
         />
       )}
       {modal === "donate" && (
-        <DonateModal onClose={() => setModal(null)} />
+        <DonateModal onClose={() => setModal(null)} onComplete={() => setModal(null)} />
       )}
     </section>
   );
