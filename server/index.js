@@ -16,6 +16,11 @@ mongoose.connect(process.env.MONGO_URI)
   })
   .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
+// Health Check Route
+app.get('/', (req, res) => {
+  res.json({ message: 'Tech4All API is running smoothly 🚀' });
+});
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/dashboard', require('./routes/dashboard'));

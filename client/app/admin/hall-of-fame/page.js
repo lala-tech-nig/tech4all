@@ -266,10 +266,14 @@ export default function AdminHallOfFame() {
               <button 
                 disabled={submitting}
                 type="submit" 
-                className={`w-full font-bold py-3 rounded-lg transition ${submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600'}`}
+                className={`w-full font-bold py-3 rounded-lg transition flex items-center justify-center space-x-2 ${submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600 shadow-lg shadow-orange-500/20 active:scale-[0.98]'}`}
               >
-                {submitting ? 'Saving...' : (editing ? 'Save Changes' : 'Add to Hall of Fame')}
+                {submitting && (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                )}
+                <span>{submitting ? 'Saving...' : (editing ? 'Save Changes' : 'Add to Hall of Fame')}</span>
               </button>
+
             </form>
           </div>
         </div>

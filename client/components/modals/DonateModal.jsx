@@ -4,9 +4,20 @@ import ModalWrapper from "./ModalWrapper";
 import { Copy, Check, Landmark, User, Hash } from "lucide-react";
 import toast from "react-hot-toast";
 
-export default function DonateModal({ onClose }) {
+export default function DonateModal({ onClose, onComplete }) {
   const [copied, setCopied] = useState(false);
+  const [isFinishing, setIsFinishing] = useState(false);
   const accountNumber = "9668443029";
+
+
+  const handleComplete = () => {
+    setIsFinishing(true);
+    toast.success("Thank you for your generosity!");
+    setTimeout(() => {
+      onComplete();
+    }, 800);
+  };
+
 
   const handleCopy = () => {
     navigator.clipboard.writeText(accountNumber);
@@ -72,11 +83,20 @@ export default function DonateModal({ onClose }) {
       <div className="mt-8 pt-6 border-t border-gray-100 text-center">
         <p className="text-xs text-gray-400 font-medium">Please send a screenshot of the transaction to <span className="text-orange-600 font-bold">@LALATECH</span> for confirmation.</p>
         <button 
-          onClick={onClose}
-          className="mt-6 w-full py-4 bg-gray-900 text-white font-bold rounded-2xl hover:bg-gray-800 transition active:scale-[0.98] shadow-xl shadow-gray-900/10"
+          disabled={isFinishing}
+          onClick={handleComplete}
+          className={`mt-6 w-full py-4 text-white font-bold rounded-2xl transition active:scale-[0.98] shadow-xl flex items-center justify-center space-x-2 ${isFinishing ? 'bg-emerald-500' : 'bg-gray-900 hover:bg-gray-800 shadow-gray-900/10'}`}
         >
-          I've made the transfer
+          {isFinishing ? (
+            <>
+              <Check size={20} strokeWidth={3} />
+              <span>Transfer Noted!</span>
+            </>
+          ) : (
+            <span>I've made the transfer</span>
+          )}
         </button>
+
       </div>
     </ModalWrapper>
   );

@@ -9,14 +9,15 @@ import ContactForm from '@/components/ContactForm';
 
 export default function Home() {
   return (
-    <>
-    <HeroCarousel />
+    <div id="home">
+      <HeroCarousel />
       <ProgramsSection />
       <VolunteerCTA />
       <HallOfFame />
       <GalleryPreview />
       <PartnersCarousel />
       <ContactForm />
-    </>
+    </div>
   );
 }
+

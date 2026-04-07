@@ -17,29 +17,34 @@ router.get('/', async (req, res) => {
 const { upload } = require('../utils/cloudinary');
 
 // @route   POST /api/gallery
-// @desc    Add a gallery image (Admin)
-// Expects 'image' file field + other data in body
-router.post('/', [auth, upload.single('image')], async (req, res) => {
+// @desc    Add gallery images (Admin)
+// Expects 'images' file array + other data in body
+router.post('/', [auth, upload.array('images', 20)], async (req, res) => {
   try {
     const { caption, category } = req.body;
     
-    if (!req.file) {
-      return res.status(400).json({ message: 'No image file uploaded' });
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: 'No images uploaded' });
     }
 
-    const newImage = new GalleryImage({
-      url: req.file.path, // Cloudinary secure_url provided by multer-storage-cloudinary
-      caption,
-      category
-    });
+    const savedImages = [];
+    for (const file of req.files) {
+      const newImage = new GalleryImage({
+        url: file.path, 
+        caption,
+        category
+      });
+      await newImage.save();
+      savedImages.push(newImage);
+    }
     
-    await newImage.save();
-    res.status(201).json(newImage);
+    res.status(201).json({ message: `${savedImages.length} images added`, images: savedImages });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server upload error' });
   }
 });
+
 
 // @route   DELETE /api/gallery/:id
 // @desc    Delete a gallery image (Admin)

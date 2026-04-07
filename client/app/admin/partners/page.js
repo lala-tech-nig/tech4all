@@ -226,10 +226,14 @@ export default function AdminPartners() {
               <button 
                 disabled={submitting}
                 type="submit" 
-                className={`w-full font-bold py-3 rounded-lg transition mt-2 shadow-lg ${submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/20 active:scale-[0.98]'}`}
+                className={`w-full font-bold py-3 rounded-lg transition flex items-center justify-center space-x-2 mt-2 shadow-lg ${submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/20 active:scale-[0.98]'}`}
               >
-                {submitting ? 'Updating...' : (editing ? 'Save Changes' : 'Add Partner')}
+                {submitting && (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                )}
+                <span>{submitting ? 'Updating...' : (editing ? 'Save Changes' : 'Add Partner')}</span>
               </button>
+
             </form>
           </div>
         </div>

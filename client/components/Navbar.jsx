@@ -7,10 +7,11 @@ import { Menu, X, ChevronRight, Heart, Users, MessageSquare, Box } from "lucide-
 import TrainingModal from "./modals/TrainingModal";
 import VolunteerModal from "./modals/VolunteerModal";
 import DonateModal from "./modals/DonateModal";
-import Confetti from "react-confetti";
 import toast from "react-hot-toast";
 
+
 const navLinks = [
+  { id: "home", label: "Home", icon: <Box size={16} /> },
   { id: "programs", label: "Programs", icon: <Box size={16} /> },
   { id: "hall", label: "Hall of Fame", icon: <Users size={16} /> },
   { id: "gallery", label: "Gallery", icon: <ChevronRight size={16} /> },
@@ -18,12 +19,14 @@ const navLinks = [
   { id: "contact", label: "Contact", icon: <MessageSquare size={16} /> },
 ];
 
+
 export default function Navbar() {
   const [active, setActive] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [modal, setModal] = useState(null);
-  const [confettiActive, setConfettiActive] = useState(false);
+
+
 
   // Handle scroll effects
   useEffect(() => {
@@ -47,28 +50,21 @@ export default function Navbar() {
   }, []);
 
   const handleSubmit = (type, name) => {
-    toast.success(
-      `${type === "training" ? "Training request" : "Volunteer application"} by ${name} received! We'll reach out soon.`,
-      { duration: 6000, style: { background: '#111', color: '#fff', borderRadius: '12px' } }
-    );
+    // Modal already showed a specific toast, but we can add a generic one or just trigger confetti
+    window.dispatchEvent(new CustomEvent('show-confetti'));
     setModal(null);
-    setConfettiActive(true);
-    setTimeout(() => setConfettiActive(false), 5000);
   };
 
-  const handleDonate = (amount) => {
-    toast.success(`Redirecting to payment for ₦${amount} donation...`);
+
+  const handleDonateSuccess = () => {
+    window.dispatchEvent(new CustomEvent('show-confetti'));
     setModal(null);
-    setConfettiActive(true);
-    setTimeout(() => {
-      setConfettiActive(false);
-      window.location.href = "https://flutterwave.com/pay/demo";
-    }, 2000);
   };
+
 
   return (
     <>
-      {confettiActive && <Confetti numberOfPieces={200} recycle={false} style={{ zIndex: 100 }} />}
+
       
       <header 
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
@@ -208,8 +204,9 @@ export default function Navbar() {
         <VolunteerModal onClose={() => setModal(null)} onSubmit={(name) => handleSubmit("volunteer", name)} />
       )}
       {modal === "donate" && (
-        <DonateModal onClose={() => setModal(null)} />
+        <DonateModal onClose={() => setModal(null)} onComplete={handleDonateSuccess} />
       )}
+
     </>
   );
 }

@@ -209,6 +209,35 @@ export default function AdminCourses() {
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Upload Course Image</label>
+                
+                {previewUrl ? (
+                  <div className="relative w-full h-40 mb-3 rounded-xl overflow-hidden border border-orange-500/30 group bg-gray-50">
+                    <img src={previewUrl} className="w-full h-full object-cover" />
+                    <button 
+                      type="button" 
+                      onClick={() => { setFile(null); setPreviewUrl(null); }}
+                      className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition shadow-lg"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ) : editingCourse?.imageUrl ? (
+                  <div className="relative w-full h-40 mb-3 rounded-xl overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center opacity-70 group">
+                    <img src={editingCourse.imageUrl} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition">Current Image</div>
+                  </div>
+                ) : null}
+
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  className="w-full border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-orange-500 transition text-sm file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                  onChange={handleFileChange}
+                />
+              </div>
+
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
                 <input 
                   required
@@ -229,6 +258,7 @@ export default function AdminCourses() {
                 ></textarea>
               </div>
               <div className="grid grid-cols-2 gap-4">
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Video URL (link to .mp4)</label>
                   <input 
@@ -262,10 +292,14 @@ export default function AdminCourses() {
                 <button 
                   disabled={submitting}
                   type="submit" 
-                  className={`w-full font-bold py-3 rounded-lg transition ${submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600'}`}
+                  className={`w-full font-bold py-3 rounded-lg transition flex items-center justify-center space-x-2 ${submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600 shadow-lg shadow-orange-500/20'}`}
                 >
-                  {submitting ? 'Processing...' : (editingCourse ? 'Save Changes' : 'Publish Program')}
+                  {submitting && (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  )}
+                  <span>{submitting ? 'Processing...' : (editingCourse ? 'Save Changes' : 'Publish Program')}</span>
                 </button>
+
               </div>
             </form>
           </div>
