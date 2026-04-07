@@ -20,6 +20,14 @@ const { upload } = require('../utils/cloudinary');
 router.post('/', [auth, upload.single('logo')], async (req, res) => {
   try {
     const partnerData = { ...req.body };
+    
+    let finalOrder = parseInt(partnerData.order);
+    if (isNaN(finalOrder)) {
+      const lastPartner = await Partner.findOne().sort('-order');
+      finalOrder = lastPartner ? (lastPartner.order || 0) + 1 : 1;
+    }
+    partnerData.order = finalOrder;
+
     if (req.file) {
       partnerData.logoUrl = req.file.path;
     }

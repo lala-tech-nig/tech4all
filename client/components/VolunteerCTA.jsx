@@ -88,12 +88,12 @@ export default function VolunteerCTA() {
 
           {/* CTA Buttons */}
           <div className="flex flex-wrap gap-4">
-            <button
-              onClick={() => setModal("volunteer")}
+            <Link
+              href="/volunteer"
               className="px-8 py-4 bg-gray-900 text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-2xl hover:bg-orange-600 transition-all transform hover:-translate-y-1 active:scale-95"
             >
               Start Your Journey
-            </button>
+            </Link>
             <button
               onClick={() => setShowRoles(true)}
               className="px-8 py-4 border-2 border-gray-200 text-gray-900 font-black uppercase tracking-widest text-xs rounded-2xl hover:border-orange-500 hover:text-orange-600 transition-all transform hover:-translate-y-1"

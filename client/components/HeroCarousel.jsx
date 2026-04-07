@@ -89,20 +89,20 @@ export default function HeroCarousel() {
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
                   </button>
 
-                  <button
-                    onClick={() => setModal("volunteer")}
+                  <Link
+                    href="/volunteer"
                     className="px-10 py-5 bg-white text-gray-900 font-black uppercase tracking-widest text-[11px] rounded-2xl shadow-xl hover:bg-gray-100 active:scale-95 transition-all flex items-center gap-2"
                   >
                     Volunteer <Sparkles size={16} className="text-orange-500" />
-                  </button>
+                  </Link>
 
-                  <button
-                    onClick={() => setModal("donate")}
+                  <Link
+                    href="/contact"
                     className="px-10 py-5 bg-transparent border-2 border-white/20 text-white font-black uppercase tracking-widest text-[11px] rounded-2xl hover:bg-white hover:text-gray-900 transition-all flex items-center gap-2 overflow-hidden group"
                   >
                     <Heart size={16} className="group-hover:fill-red-500 group-hover:text-red-500 transition-colors" />
                     <span>Support Us</span>
-                  </button>
+                  </Link>
                 </div>
 
                 <div className="mt-20 flex items-center gap-10">

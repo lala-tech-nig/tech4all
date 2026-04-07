@@ -21,6 +21,12 @@ router.post('/', [auth, upload.single('image')], async (req, res) => {
   try {
     const { title, subtitle, order, isActive } = req.body;
     
+    let finalOrder = parseInt(order);
+    if (isNaN(finalOrder)) {
+      const lastSlide = await HeroSlide.findOne().sort('-order');
+      finalOrder = lastSlide ? (lastSlide.order || 0) + 1 : 1;
+    }
+
     if (!req.file) {
       return res.status(400).json({ message: 'No image uploaded' });
     }
@@ -29,7 +35,7 @@ router.post('/', [auth, upload.single('image')], async (req, res) => {
       src: req.file.path,
       title,
       subtitle,
-      order: parseInt(order),
+      order: finalOrder,
       isActive: isActive === 'true' // FormData sends boolean as string
     });
     

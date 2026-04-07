@@ -67,9 +67,14 @@ export default function AboutPage() {
             <div className="absolute inset-0 bg-orange-600 opacity-0 group-hover:opacity-10 transition duration-1000" />
             <h2 className="text-4xl font-black mb-6 uppercase tracking-widest">Wanna join the movement?</h2>
             <p className="max-w-xl mx-auto opacity-70 mb-10 font-bold tracking-widest uppercase text-xs">Be part of the solution and help us transform lives.</p>
-            <a href="/contact" className="px-10 py-5 bg-white text-gray-900 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-orange-500 hover:text-white transition transform hover:scale-105 inline-block">
-               Donate Now
-            </a>
+            <div className="flex flex-wrap justify-center gap-4">
+               <Link href="/volunteer" className="px-10 py-5 bg-orange-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-orange-500 transition transform hover:scale-105 inline-block">
+                  Volunteer Now
+               </Link>
+               <Link href="/contact" className="px-10 py-5 bg-white text-gray-900 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-orange-500 hover:text-white transition transform hover:scale-105 inline-block">
+                  Donate Now
+               </Link>
+            </div>
          </div>
       </div>
     </div>

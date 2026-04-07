@@ -33,12 +33,19 @@ router.get('/', async (req, res) => {
 router.post('/', [auth, upload.single('video')], async (req, res) => {
   try {
     const { title, description, videoUrl, icon, order, isActive } = req.body;
+    
+    let finalOrder = parseInt(order);
+    if (isNaN(finalOrder)) {
+      const lastCourse = await Course.findOne().sort('-order');
+      finalOrder = lastCourse ? (lastCourse.order || 0) + 1 : 1;
+    }
+
     const courseData = {
       title,
       description,
       videoUrl,
       icon,
-      order: parseInt(order) || 0,
+      order: finalOrder,
       isActive: isActive === 'true'
     };
 

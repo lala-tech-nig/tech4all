@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import ModalWrapper from './ModalWrapper';
 import { API_BASE_URL } from '@/utils/api';
-import { User, Mail, Sparkles, Send, Heart } from 'lucide-react';
+import { User, Mail, Sparkles, Send, Heart, Phone } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function VolunteerModal({ onClose, onSubmit }) {

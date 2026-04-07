@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { API_BASE_URL } from '@/utils/api';
 import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
+import Link from 'next/link';
 import toast from 'react-hot-toast';
 
 export default function Footer() {
@@ -98,15 +99,20 @@ export default function Footer() {
             <span className="w-8 h-[2px] bg-orange-500/50 rounded-full"></span>
           </h4>
           <ul className="space-y-4 text-sm font-bold">
-            {["Request Training", "Volunteer", "Donate", "About Us"].map((link, i) => (
+            {[
+              { label: "Request Training", href: "/programs" },
+              { label: "Volunteer", href: "/volunteer" },
+              { label: "Donate", href: "/contact" },
+              { label: "About Us", href: "/about" }
+            ].map((link, i) => (
               <li key={i}>
-                <button 
-                  onClick={() => {}} 
+                <Link 
+                  href={link.href} 
                   className="hover:text-orange-500 transition duration-300 flex items-center space-x-3 w-full text-left group"
                 >
                   <span className="h-1.5 w-1.5 bg-orange-500 rounded-full group-hover:scale-150 transition-transform"></span>
-                  <span className="group-hover:translate-x-1 transition-transform">{link}</span>
-                </button>
+                  <span className="group-hover:translate-x-1 transition-transform">{link.label}</span>
+                </Link>
               </li>
             ))}
           </ul>

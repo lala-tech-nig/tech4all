@@ -17,6 +17,7 @@ const navLinks = [
   { path: "/about", label: "About", id: "about" },
   { path: "/programs", label: "Programs", id: "programs" },
   { path: "/hall-of-fame", label: "Hall of Fame", id: "hall" },
+  { path: "/volunteer", label: "Volunteer", id: "volunteer" },
   { path: "/gallery", label: "Gallery", id: "gallery" },
   { path: "/partners", label: "Partners", id: "partners" },
   { path: "/contact", label: "Contact", id: "contact" },
