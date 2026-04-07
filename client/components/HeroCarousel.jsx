@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { API_BASE_URL } from "@/utils/api";
 import Image from "next/image";
+import Link from "next/link";
 import { Typewriter } from "react-simple-typewriter";
 import TrainingModal from "./modals/TrainingModal";
 import VolunteerModal from "./modals/VolunteerModal";

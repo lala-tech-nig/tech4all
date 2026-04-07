@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { API_BASE_URL } from "@/utils/api";
 import { motion } from "framer-motion";
 import Lottie from "lottie-react";
